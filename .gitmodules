@@ -1,0 +1,6 @@
+[submodule "external/fluidsynth"]
+	path = external/fluidsynth
+	url = https://github.com/atsushieno/fluidsynth-fork.git
+[submodule "external/JNAerator"]
+	path = external/JNAerator
+	url = https://github.com/nativelibs4java/JNAerator.git
