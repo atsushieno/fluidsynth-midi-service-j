@@ -1,6 +1,7 @@
 #!/bin/bash
 
 JNAERATOR_JAR = ../external/JNAerator/jnaerator/target/jnaerator-0.13-SNAPSHOT-shaded.jar
+FL_INC = ../../external/fluidsynth/include/fluidsynth
 
 all: libs/fluidsynth.jar fluidsynth
 
@@ -11,28 +12,31 @@ jnaerator.stamp:
 	touch jnaerator.stamp
 
 libs/fluidsynth.jar: $(JNAERATOR_JAR)
-	java -jar $(JNAERATOR_JAR) \
+	cd libs && \
+	java -jar ../$(JNAERATOR_JAR) \
 	-root name.atsushieno \
-	-I ../external/fluidsynth/include/ \
-	-arch linux_x86 \
+	-I ../../external/fluidsynth/include/ \
 	-library fluidsynth \
-	-mode StandaloneJar \
+	-mode Jar \
 	-runtime JNA \
 	-skipDeprecated \
-	../external/fluidsynth/include/fluidsynth/synth.h \
-	../external/fluidsynth/include/fluidsynth/sfont.h \
-	../external/fluidsynth/include/fluidsynth/audio.h \
-	../external/fluidsynth/include/fluidsynth/midi.h \
-	../external/fluidsynth/include/fluidsynth/voice.h \
-	../external/fluidsynth/include/fluidsynth/ramsfont.h \
-	../external/fluidsynth/include/fluidsynth/gen.h \
-	../external/fluidsynth/include/fluidsynth/log.h \
-	../external/fluidsynth/include/fluidsynth/misc.h \
-	../external/fluidsynth/include/fluidsynth/mod.h \
-	../external/fluidsynth/include/fluidsynth/settings.h \
-	../external/fluidsynth/include/fluidsynth/types.h \
-	#
-	cp fluidsynth.jar libs/
+	$(FL_INC)/synth.h \
+	$(FL_INC)/sfont.h \
+	$(FL_INC)/audio.h \
+	$(FL_INC)/midi.h \
+	$(FL_INC)/voice.h \
+	$(FL_INC)/event.h \
+	$(FL_INC)/gen.h \
+	$(FL_INC)/ladspa.h \
+	$(FL_INC)/log.h \
+	$(FL_INC)/misc.h \
+	$(FL_INC)/mod.h \
+	$(FL_INC)/seqbind.h \
+	$(FL_INC)/settings.h \
+	$(FL_INC)/shell.h \
+	$(FL_INC)/types.h \
+	&& \
+	cd ..
 
 fluidsynth:
 	cd ../external/fluidsynth/android && make -f Makefile.android all || echo "ignore this failure..." && make -f Makefile.android dist
