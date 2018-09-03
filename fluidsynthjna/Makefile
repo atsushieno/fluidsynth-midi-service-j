@@ -35,7 +35,7 @@ libs/fluidsynth.jar: $(JNAERATOR_JAR)
 	cp fluidsynth.jar libs/
 
 fluidsynth:
-	cd ../external/fluidsynth && make -f Makefile.android all || echo "ignore this failure..." && make -f Makefile.android dist
+	cd ../external/fluidsynth/android && make -f Makefile.android all || echo "ignore this failure..." && make -f Makefile.android dist
 	mkdir -p src/main/jniLibs
-	cp -R ../external/fluidsynth/dist/android/* src/main/jniLibs
+	cp -R ../external/fluidsynth/android/dist/* src/main/jniLibs
 
