@@ -11,12 +11,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Example of a call to a native method
-        val midi = FluidsynthMidiReceiver(this.applicationContext);
-        midi.send(arrayOf(90.toByte(),40,120).toByteArray(), 0, 3);
-        AsyncTask.execute {
-            Thread.sleep(1000)
-            midi.send(arrayOf (80.toByte(),40,0).toByteArray (), 0, 3)
+        this.button.setOnClickListener {
+            // Example of a call to a native method
+            val midi = FluidsynthMidiReceiver(this.applicationContext);
+            midi.send(arrayOf(90.toByte(),40,120).toByteArray(), 0, 3);
+            AsyncTask.execute {
+                Thread.sleep(1000)
+                midi.send(arrayOf (80.toByte(),40,0).toByteArray (), 0, 3)
+            }
         }
     }
 }

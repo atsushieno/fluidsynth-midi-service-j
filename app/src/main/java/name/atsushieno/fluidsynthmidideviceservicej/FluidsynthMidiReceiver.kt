@@ -8,19 +8,18 @@ import name.atsushieno.fluidsynthjna.Settings
 import name.atsushieno.fluidsynthjna.SoundFontLoader
 import name.atsushieno.fluidsynthjna.Synth
 import name.atsushieno.fluidsynthjna.androidextensions.AndroidAssetSoundFontLoader
-import kotlin.experimental.and
 
 
-public class FluidsynthMidiReceiver// float or 16bits
-public constructor(context: Context) : MidiReceiver()
+class FluidsynthMidiReceiver// float or 16bits
+(context: Context) : MidiReceiver()
 {
-    val predefined_temp_path = "/data/local/tmp/name.atsushieno.fluidsynthmidideviceservice";
+    private val predefined_temp_path = "/data/local/tmp/name.atsushieno.fluidsynthmidideviceservice"
 
-    val syn: Synth;
-    val adriver: AudioDriver;
-    val asset_sfloader: SoundFontLoader;
+    private val syn: Synth
+    private val adriver: AudioDriver
+    private val asset_sfloader: SoundFontLoader
 
-    var is_disposed = false;
+    private var is_disposed = false
 
     init {
         val settings = Settings ()
@@ -30,9 +29,9 @@ public constructor(context: Context) : MidiReceiver()
         val fpb = java.lang.Double.parseDouble (manager.getProperty (AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER))
         settings.getEntry(ConfigurationKeys.AudioPeriodSize).setIntValue (fpb.toInt())
         syn = Synth (settings)
-        val sfs = MutableList<String?> (10, {_ -> null})
+        val sfs = MutableList<String?> (10) { _ -> null}
         SynthAndroidExtensions.getSoundFonts (sfs, context, predefined_temp_path)
-        asset_sfloader = AndroidAssetSoundFontLoader(settings, context.getAssets())
+        asset_sfloader = AndroidAssetSoundFontLoader(settings, context.assets)
         syn.addSoundFontLoader (asset_sfloader)
         for (sf in sfs)
             if (sf != null)
@@ -40,22 +39,22 @@ public constructor(context: Context) : MidiReceiver()
         adriver = AudioDriver (syn.getSettings(), syn)
     }
 
-    public fun isDisposed() : Boolean{
-        return is_disposed;
+    fun isDisposed() : Boolean{
+        return is_disposed
     }
 
-    public fun dispose()
+    fun dispose()
     {
-        asset_sfloader.close ();
-        adriver.close ();
-        syn.close ();
-        is_disposed = true;
+        asset_sfloader.close ()
+        adriver.close ()
+        syn.close ()
+        is_disposed = true
     }
 
     override fun onSend(msg: ByteArray?, offset: Int, count: Int, timestamp: Long) {
         // FIXME: consider timestamp
         if (msg == null)
-            throw IllegalArgumentException ("null msg");
+            throw IllegalArgumentException ("null msg")
         val ch = msg[offset].toInt() and 0x0F
         when (msg[offset].toInt() and 0xF0) {
             0x80 -> syn.noteOff(ch, msg[offset + 1].toInt())

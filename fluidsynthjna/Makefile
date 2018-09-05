@@ -19,6 +19,7 @@ libs/fluidsynth.jar: $(JNAERATOR_JAR)
 	-library fluidsynth \
 	-mode Jar \
 	-runtime JNA \
+	-f \
 	-skipDeprecated \
 	$(FL_INC)/synth.h \
 	$(FL_INC)/sfont.h \

@@ -2,14 +2,7 @@ package name.atsushieno.fluidsynthjna
 
 import com.sun.jna.ptr.PointerByReference
 
-public class Voice : FluidsynthObject
+class Voice(handle: PointerByReference) : FluidsynthObject(handle, false)
 {
-    public constructor(handle : PointerByReference)
-    : super (handle, false)
-    {
-
-    }
-
-    override fun onClose() {
-    }
+    override fun onClose() {}
 }

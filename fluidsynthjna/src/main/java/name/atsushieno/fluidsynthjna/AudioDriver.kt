@@ -3,15 +3,15 @@ package name.atsushieno.fluidsynthjna
 import com.sun.jna.ptr.PointerByReference
 import name.atsushieno.fluidsynth.FluidsynthLibrary
 
-public class AudioDriver : FluidsynthObject
+class AudioDriver : FluidsynthObject
 {
     companion object {
-        val library = FluidsynthLibrary.INSTANCE;
+        val library = FluidsynthLibrary.INSTANCE
     }
 
     //public delegate int AudioHandler (byte [] data, float [][] outBuffer);
 
-    public constructor(settings : Settings, synth : Synth)
+    constructor(settings : Settings, synth : Synth)
         : super (library.new_fluid_audio_driver (settings.getHandle(), synth.getHandle()), true)
     {
     }
@@ -36,6 +36,6 @@ public class AudioDriver : FluidsynthObject
     */
 
     override fun onClose() {
-        library.delete_fluid_audio_driver (getHandle());
+        library.delete_fluid_audio_driver (getHandle())
     }
 }
