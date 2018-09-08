@@ -7,6 +7,7 @@ import com.sun.jna.Pointer
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.PointerByReference
 import name.atsushieno.fluidsynth.FluidsynthLibrary
+import name.atsushieno.fluidsynth.FluidsynthLibrary.FLUID_FAILED
 import java.nio.ByteBuffer
 
 class Synth : FluidsynthObject {
@@ -170,22 +171,22 @@ class Synth : FluidsynthObject {
     // Then fluid_synth_stop() is paired by the function above, so I don't bind it either.
 
     fun loadSoundFont(filename: String, resetPresets: Boolean) {
-        if (library.fluid_synth_sfload(getHandle(), filename, if (resetPresets) 1 else 0) < 0)
+        if (library.fluid_synth_sfload(getHandle(), filename, if (resetPresets) 1 else 0) == FLUID_FAILED)
             onError("sound font load operation failed")
     }
 
     fun reloadSoundFont(id: Int) {
-        if (library.fluid_synth_sfreload(getHandle(), id) != 0)
+        if (library.fluid_synth_sfreload(getHandle(), id) == FLUID_FAILED)
             onError("sound font reload operation failed")
     }
 
     fun unloadSoundFont(id: Int, resetPresets: Boolean) {
-        if (library.fluid_synth_sfunload(getHandle(), id, if (resetPresets) 1 else 0) != 0)
+        if (library.fluid_synth_sfunload(getHandle(), id, if (resetPresets) 1 else 0) == FLUID_FAILED)
         onError("sound font unload operation failed")
     }
 
     fun addSoundFont(soundFont: SoundFont) {
-        if (library.fluid_synth_add_sfont(getHandle(), soundFont.getHandle()) != 0)
+        if (library.fluid_synth_add_sfont(getHandle(), soundFont.getHandle()) == FLUID_FAILED)
             onError("sound font add operation failed")
     }
 
