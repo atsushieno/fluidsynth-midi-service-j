@@ -12,7 +12,7 @@ jnaerator.stamp:
 	touch jnaerator.stamp
 
 libs/fluidsynth.jar: $(JNAERATOR_JAR)
-	cd libs && \
+	mkdir -p libs && cd libs && \
 	java -jar ../$(JNAERATOR_JAR) \
 	-root name.atsushieno \
 	-I ../../external/fluidsynth/include/ \
