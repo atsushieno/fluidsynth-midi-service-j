@@ -23,6 +23,7 @@ class FluidsynthMidiReceiver// float or 16bits
 
     init {
         val settings = Settings ()
+        settings.getEntry (ConfigurationKeys.AudioDriver).setStringValue("opensles")
         settings.getEntry (ConfigurationKeys.AudioSampleFormat).setStringValue ("16bits")
         val manager = context.getSystemService (Context.AUDIO_SERVICE) as AudioManager
         settings.getEntry(ConfigurationKeys.SynthSampleRate).setDoubleValue (11025.toDouble())
