@@ -35,7 +35,8 @@ class AndroidAssetSoundFontLoader : SoundFontLoader
         override fun open (filename : String) : Pointer?
         {
             val stream = am.open (filename, AssetManager.ACCESS_RANDOM) ?: throw IllegalArgumentException ("Asset for the argument file does not exist: $filename")
-            val ptr =Pointer(counter++)
+            ++counter
+            val ptr =Pointer(counter)
             streams[ptr] = stream
             return ptr
         }
