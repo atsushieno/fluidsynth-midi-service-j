@@ -5,4 +5,5 @@
 .DS_Store
 /build
 /captures
+external/fluid-soundfont-3.1/
 .externalNativeBuild
