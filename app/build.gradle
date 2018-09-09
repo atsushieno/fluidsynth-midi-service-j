@@ -19,7 +19,17 @@ android {
             }
         }
     }
+
+    // FIXME: make it conditional, strip for release builds
+    packagingOptions{
+        doNotStrip "*/armeabi/libfluidsynth.so"
+        doNotStrip "*/armeabi-v7a/libfluidsynth.so"
+        doNotStrip "*/x86/libfluidsynth.so"
+    }
     buildTypes {
+        debug {
+            minifyEnabled false
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
