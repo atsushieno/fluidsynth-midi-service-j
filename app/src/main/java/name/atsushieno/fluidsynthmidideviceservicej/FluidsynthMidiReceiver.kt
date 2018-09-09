@@ -3,6 +3,7 @@ package name.atsushieno.fluidsynthmidideviceservicej
 import android.content.Context
 import android.media.AudioManager
 import android.media.midi.MidiReceiver
+import com.ochafik.lang.jnaerator.runtime.name.atsushieno.fluidsynthjna.androidextensions.AndroidLogger
 import name.atsushieno.fluidsynthjna.AudioDriver
 import name.atsushieno.fluidsynthjna.Settings
 import name.atsushieno.fluidsynthjna.SoundFontLoader
@@ -22,6 +23,8 @@ class FluidsynthMidiReceiver// float or 16bits
     private var is_disposed = false
 
     init {
+        AndroidLogger.installAndroidLogger()
+
         val settings = Settings ()
         settings.getEntry (ConfigurationKeys.AudioDriver).setStringValue("opensles")
         settings.getEntry (ConfigurationKeys.AudioSampleFormat).setStringValue ("16bits")
