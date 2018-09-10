@@ -20,6 +20,7 @@ android {
         doNotStrip "*/armeabi/libfluidsynth.so"
         doNotStrip "*/armeabi-v7a/libfluidsynth.so"
         doNotStrip "*/x86/libfluidsynth.so"
+        doNotStrip "*/x86_64/libfluidsynth.so"
     }
 
     buildTypes {
