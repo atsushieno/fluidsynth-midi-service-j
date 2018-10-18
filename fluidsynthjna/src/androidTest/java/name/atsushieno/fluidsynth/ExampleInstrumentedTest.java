@@ -1,4 +1,4 @@
-package name.atsushieno.fluidsynthjna;
+package name.atsushieno.fluidsynth;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

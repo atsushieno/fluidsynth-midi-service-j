@@ -1,7 +1,6 @@
-package name.atsushieno.fluidsynthjna
+package fluidsynth
 
 import com.sun.jna.ptr.PointerByReference
-import name.atsushieno.fluidsynth.FluidsynthLibrary
 
 class Settings : FluidsynthObject
 {
@@ -22,7 +21,7 @@ class Settings : FluidsynthObject
 
     fun getEntry (name : String) : SettingEntry
     {
-        return SettingEntry (getHandle(), name)
+        return Settings.SettingEntry(getHandle(), name)
     }
 
     class SettingEntry

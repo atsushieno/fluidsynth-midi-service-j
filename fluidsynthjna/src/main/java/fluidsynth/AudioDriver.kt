@@ -1,7 +1,9 @@
-package name.atsushieno.fluidsynthjna
+package fluidsynth
 
-import com.sun.jna.ptr.PointerByReference
-import name.atsushieno.fluidsynth.FluidsynthLibrary
+import fluidsynth.FluidsynthLibrary
+import fluidsynth.FluidsynthObject
+import fluidsynth.Settings
+import fluidsynth.Synth
 
 class AudioDriver : FluidsynthObject
 {

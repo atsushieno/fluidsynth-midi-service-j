@@ -1,9 +1,8 @@
-package name.atsushieno.fluidsynthjna
+package fluidsynth
 
 import com.sun.jna.NativeLong
 import com.sun.jna.Pointer
 import com.sun.jna.ptr.PointerByReference
-import name.atsushieno.fluidsynth.FluidsynthLibrary
 
 open class SoundFontLoader : FluidsynthObject {
     abstract class SoundFontLoaderLoadDelegate {
@@ -21,7 +20,7 @@ open class SoundFontLoader : FluidsynthObject {
             }
         }
 
-        val native = NativeInvoker(this)
+        public val native = NativeInvoker(this)
 
         abstract fun apply(loader: SoundFontLoader, filename: String): SoundFont
     }
@@ -36,7 +35,7 @@ open class SoundFontLoader : FluidsynthObject {
                 java.apply(SoundFontLoader(PointerByReference(sfLoader), false))
             }
 
-            private val java: SoundFontLoaderFreeDelegate
+            public val java: SoundFontLoaderFreeDelegate
         }
 
         val native = NativeInvoker(this)

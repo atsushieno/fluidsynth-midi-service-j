@@ -1,4 +1,4 @@
-package name.atsushieno.fluidsynthjna;
+package name.atsushieno.fluidsynth;
 
 import org.junit.Test;
 

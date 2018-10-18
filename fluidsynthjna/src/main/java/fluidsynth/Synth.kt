@@ -1,13 +1,12 @@
 @file:Suppress("unused")
 
-package name.atsushieno.fluidsynthjna
+package fluidsynth
 
 import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.PointerByReference
-import name.atsushieno.fluidsynth.FluidsynthLibrary
-import name.atsushieno.fluidsynth.FluidsynthLibrary.FLUID_FAILED
+import fluidsynth.FluidsynthLibrary.FLUID_FAILED
 import java.nio.ByteBuffer
 
 class Synth : FluidsynthObject {
@@ -201,19 +200,19 @@ class Synth : FluidsynthObject {
     fun getSoundFont (index : Int) : SoundFont?
     {
         val ret = library.fluid_synth_get_sfont (getHandle(), index)
-        return if (ret == Pointer.NULL) null else SoundFont (ret)
+        return if (ret == Pointer.NULL) null else SoundFont(ret)
     }
 
     fun getSoundFontById (id : Int) : SoundFont?
     {
         val ret = library.fluid_synth_get_sfont_by_id (getHandle(), id)
-        return if (ret == Pointer.NULL) null else SoundFont (ret)
+        return if (ret == Pointer.NULL) null else SoundFont(ret)
     }
 
     fun getSoundFontByName (name : String) : SoundFont?
     {
         val ret = library.fluid_synth_get_sfont_by_name (getHandle(), name)
-        return if (ret == Pointer.NULL) null else SoundFont (ret)
+        return if (ret == Pointer.NULL) null else SoundFont(ret)
     }
 
     fun setBankOffset (soundFontId : Int, offset : Int)
@@ -496,7 +495,7 @@ class Synth : FluidsynthObject {
         val ret = library.fluid_synth_alloc_voice (getHandle(), sample, channel, key, vel)
         if (ret == Pointer.NULL)
             onError ("voice allocate operation failed")
-        return Voice (ret)
+        return Voice(ret)
     }
 
     fun startVoice (voice : Voice)

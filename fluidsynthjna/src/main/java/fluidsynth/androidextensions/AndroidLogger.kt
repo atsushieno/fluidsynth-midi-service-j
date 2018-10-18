@@ -1,8 +1,8 @@
-package com.ochafik.lang.jnaerator.runtime.name.atsushieno.fluidsynthjna.androidextensions
+package fluidsynth.androidextensions
 
 import com.sun.jna.Pointer
-import name.atsushieno.fluidsynth.FluidsynthLibrary
-import name.atsushieno.fluidsynth.FluidsynthLibrary.fluid_log_level.*
+import fluidsynth.FluidsynthLibrary
+import fluidsynth.FluidsynthLibrary.fluid_log_level.*
 
 class AndroidLogger : FluidsynthLibrary.fluid_log_function_t {
 

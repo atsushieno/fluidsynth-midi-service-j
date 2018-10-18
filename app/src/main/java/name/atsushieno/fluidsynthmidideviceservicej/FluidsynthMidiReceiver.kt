@@ -3,12 +3,13 @@ package name.atsushieno.fluidsynthmidideviceservicej
 import android.content.Context
 import android.media.AudioManager
 import android.media.midi.MidiReceiver
-import com.ochafik.lang.jnaerator.runtime.name.atsushieno.fluidsynthjna.androidextensions.AndroidLogger
-import name.atsushieno.fluidsynthjna.AudioDriver
-import name.atsushieno.fluidsynthjna.Settings
-import name.atsushieno.fluidsynthjna.SoundFontLoader
-import name.atsushieno.fluidsynthjna.Synth
-import name.atsushieno.fluidsynthjna.androidextensions.AndroidAssetSoundFontLoader
+import fluidsynth.androidextensions.AndroidLogger
+import fluidsynth.androidextensions.AndroidNativeAssetSoundFontLoader
+import fluidsynth.AudioDriver
+import fluidsynth.Settings
+import fluidsynth.SoundFontLoader
+import fluidsynth.Synth
+import fluidsynth.androidextensions.AndroidAssetSoundFontLoader
 
 
 class FluidsynthMidiReceiver// float or 16bits
@@ -29,17 +30,23 @@ class FluidsynthMidiReceiver// float or 16bits
         settings.getEntry (ConfigurationKeys.AudioDriver).setStringValue("opensles")
         settings.getEntry (ConfigurationKeys.AudioSampleFormat).setStringValue ("16bits")
         val manager = context.getSystemService (Context.AUDIO_SERVICE) as AudioManager
-        settings.getEntry(ConfigurationKeys.SynthSampleRate).setDoubleValue (11025.toDouble())
+        settings.getEntry (ConfigurationKeys.SynthSampleRate).setDoubleValue (11025.toDouble())
         val fpb = java.lang.Double.parseDouble (manager.getProperty (AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER))
-        settings.getEntry(ConfigurationKeys.AudioPeriodSize).setIntValue (fpb.toInt())
+        settings.getEntry (ConfigurationKeys.AudioPeriodSize).setIntValue (fpb.toInt())
         syn = Synth (settings)
         val sfs = MutableList<String?> (10) { _ -> null}
-        SynthAndroidExtensions.getSoundFonts (sfs, context, predefined_temp_path)
-        asset_sfloader = AndroidAssetSoundFontLoader(settings, context.assets)
+
+        SynthAndroidExtensions.getSoundFonts (sfs, context, null)
+        asset_sfloader = AndroidNativeAssetSoundFontLoader(settings, context.assets)
+        // Still has some issue that callbacks are reset in the middle, more GC pinning is likely required.
+        //asset_sfloader = AndroidAssetSoundFontLoader(settings, context.assets)
         syn.addSoundFontLoader (asset_sfloader)
+
         for (sf in sfs)
             if (sf != null)
-                syn.loadSoundFont (sf, false)
+                // FIXME: remove path hack
+                syn.loadSoundFont (/*predefined_temp_path + "/" + */sf, false)
+
         adriver = AudioDriver (syn.getSettings(), syn)
     }
 
@@ -49,7 +56,7 @@ class FluidsynthMidiReceiver// float or 16bits
 
     fun dispose()
     {
-        asset_sfloader.close ()
+        //asset_sfloader.close ()
         adriver.close ()
         syn.close ()
         is_disposed = true

@@ -1,4 +1,4 @@
-package name.atsushieno.fluidsynthjna
+package fluidsynth
 
 class FluidsynthInteropException : Exception
 {

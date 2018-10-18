@@ -2,6 +2,7 @@
 
 JNAERATOR_JAR = ../external/JNAerator/jnaerator/target/jnaerator-0.13-SNAPSHOT-shaded.jar
 FL_INC = ../../external/fluidsynth/include/fluidsynth
+ANDROID_NDK = ~/android-sdk-linux/ndk-bundle
 
 SF2 = ../external/fluid-soundfont-3.1/FluidR3_GM.sf2
 
@@ -26,8 +27,8 @@ jnaerator.stamp:
 libs/fluidsynth.jar: $(JNAERATOR_JAR)
 	mkdir -p libs && cd libs && \
 	java -jar ../$(JNAERATOR_JAR) \
-	-root name.atsushieno \
 	-I ../../external/fluidsynth/include/ \
+	-I $(ANDROID_NDK)/usr/include/ \
 	-library fluidsynth \
 	-mode Jar \
 	-runtime JNA \
@@ -48,6 +49,7 @@ libs/fluidsynth.jar: $(JNAERATOR_JAR)
 	$(FL_INC)/settings.h \
 	$(FL_INC)/shell.h \
 	$(FL_INC)/types.h \
+	$(FL_INC)/android.h \
 	&& \
 	cd ..
 

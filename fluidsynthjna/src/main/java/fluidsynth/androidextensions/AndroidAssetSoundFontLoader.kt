@@ -1,23 +1,25 @@
-package name.atsushieno.fluidsynthjna.androidextensions
+package fluidsynth.androidextensions
 
 import android.content.res.AssetManager
 import com.sun.jna.Pointer
-import name.atsushieno.fluidsynth.FluidsynthLibrary
-import name.atsushieno.fluidsynthjna.Settings
-import name.atsushieno.fluidsynthjna.SoundFontLoader
+import fluidsynth.FluidsynthLibrary
+import fluidsynth.Settings
+import fluidsynth.SoundFontLoader
 import java.io.InputStream
 import kotlin.collections.HashMap
 
+/* FIXME:
+    These callbacks likely need to be "pinned"
+ */
 class AndroidAssetSoundFontLoader : SoundFontLoader
 {
-    companion object {
-        val library = FluidsynthLibrary.INSTANCE
-    }
+    public val callbacks : AssetLoaderCallbacks
 
     constructor(settings : Settings, assetManager : AssetManager)
     : super (library.new_fluid_defsfloader (settings.getHandle()), true)
     {
-        setCallbacks (AssetLoaderCallbacks (assetManager))
+        callbacks = AssetLoaderCallbacks(assetManager)
+        setCallbacks (callbacks)
     }
 
     override fun onClose() {
@@ -71,30 +73,40 @@ class AndroidAssetSoundFontLoader : SoundFontLoader
 
         override fun seek (sfHandle : Pointer?, offset : Int, origin : Int) : Int
         {
+            System.out.println("SEEK 1")
             val stream = streams [sfHandle] ?: throw IllegalArgumentException ("Asset for the argument pointer does not exist: $sfHandle")
             when (origin) {
                 SEEK_BEGIN -> {
+                    System.out.printf("SEEK BEGIN: %d", offset)
                     stream.reset()
                     stream.skip(offset.toLong())
+                    System.out.println("SEEK BEGIN DONE")
                     return offset
                 }
                 SEEK_CUR -> {
+                    System.out.printf("SEEK CUR: %d", offset)
                     val remaining = stream.available()
                     stream.reset()
                     val available = stream.available()
                     val current = available - remaining
                     val newPos = current + offset
                     stream.skip (newPos.toLong())
+                    System.out.println("SEEK CUR DONE")
                     return newPos
                 }
                 SEEK_END -> {
+                    System.out.printf("SEEK END: %d", offset)
                     stream.reset()
                     val available = stream.available()
                     val newPos = available + offset
                     stream.skip(newPos.toLong())
+                    System.out.println("SEEK END DONE")
                     return newPos
                 }
-                else -> throw IllegalArgumentException ("Unexpected seek origin: $origin")
+                else -> {
+                    System.out.println("SEEK THROW")
+                    throw IllegalArgumentException ("Unexpected seek origin: $origin")
+                }
             }
         }
 

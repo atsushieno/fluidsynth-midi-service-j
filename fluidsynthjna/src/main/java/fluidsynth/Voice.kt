@@ -1,4 +1,4 @@
-package name.atsushieno.fluidsynthjna
+package fluidsynth
 
 import com.sun.jna.ptr.PointerByReference
 
