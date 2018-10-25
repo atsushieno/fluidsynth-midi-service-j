@@ -31,7 +31,8 @@ class FluidsynthMidiReceiver// float or 16bits
         settings.getEntry (ConfigurationKeys.AudioSampleFormat).setStringValue ("16bits")
         val manager = context.getSystemService (Context.AUDIO_SERVICE) as AudioManager
         settings.getEntry (ConfigurationKeys.SynthSampleRate).setDoubleValue (11025.toDouble())
-        val fpb = java.lang.Double.parseDouble (manager.getProperty (AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER))
+        val framesPerBufferSpec = manager.getProperty (AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER)
+        val fpb = java.lang.Double.parseDouble (framesPerBufferSpec)
         settings.getEntry (ConfigurationKeys.AudioPeriodSize).setIntValue (fpb.toInt())
         syn = Synth (settings)
         val sfs = MutableList<String?> (10) { _ -> null}
@@ -48,6 +49,7 @@ class FluidsynthMidiReceiver// float or 16bits
                 syn.loadSoundFont (/*predefined_temp_path + "/" + */sf, false)
 
         adriver = AudioDriver (syn.getSettings(), syn)
+        syn.systemReset()
     }
 
     fun isDisposed() : Boolean{
