@@ -20,10 +20,14 @@ class MainActivity : AppCompatActivity() {
                 midi = FluidsynthMidiReceiver(this.applicationContext)
             midi.send(arrayOf(0xB0.toByte(), 7, 120).toByteArray(), 0, 3)
             midi.send(arrayOf(0xC0.toByte(), 48).toByteArray(), 0, 2)
-            midi.send(arrayOf(0x90.toByte(),40,120).toByteArray(), 0, 3)
+            midi.send(arrayOf(0x90.toByte(), 0x40,120).toByteArray(), 0, 3)
+            midi.send(arrayOf(0x90.toByte(), 0x44,120).toByteArray(), 0, 3)
+            midi.send(arrayOf(0x90.toByte(), 0x47,120).toByteArray(), 0, 3)
             AsyncTask.execute {
                 Thread.sleep(5000)
-                midi.send(arrayOf (0x80.toByte(),40,0).toByteArray (), 0, 3)
+                midi.send(arrayOf (0x80.toByte(), 0x40,0).toByteArray (), 0, 3)
+                midi.send(arrayOf (0x80.toByte(), 0x44,0).toByteArray (), 0, 3)
+                midi.send(arrayOf (0x80.toByte(), 0x47,0).toByteArray (), 0, 3)
             }
 
             this.button.isEnabled = true
