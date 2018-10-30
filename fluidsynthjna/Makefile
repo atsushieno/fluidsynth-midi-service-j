@@ -9,6 +9,10 @@ SF2 = ../external/fluid-soundfont-3.1/FluidR3_GM.sf2
 all: libs/fluidsynth.jar fluidsynth prepare-sf2
 
 PHONY:
+prepare-fluidsynth:
+	cd ../external/fluidsynth/android && make -f Makefile.android prepare
+
+PHONY:
 prepare-sf2: $(SF2)
 	mkdir -p src/main/assets && cp ../external/fluid-soundfont-3.1/FluidR3_GM.sf2 src/main/assets
 
