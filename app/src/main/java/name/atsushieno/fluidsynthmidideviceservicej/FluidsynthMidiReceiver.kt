@@ -27,7 +27,6 @@ class FluidsynthMidiReceiver// float or 16bits
         AndroidLogger.installAndroidLogger()
 
         val settings = Settings ()
-        settings.getEntry (ConfigurationKeys.AudioDriver).setStringValue("opensles")
         settings.getEntry (ConfigurationKeys.AudioSampleFormat).setStringValue ("16bits")
         val manager = context.getSystemService (Context.AUDIO_SERVICE) as AudioManager
         settings.getEntry (ConfigurationKeys.SynthSampleRate).setDoubleValue (11025.toDouble())
@@ -39,14 +38,13 @@ class FluidsynthMidiReceiver// float or 16bits
 
         SynthAndroidExtensions.getSoundFonts (sfs, context, null)
         asset_sfloader = AndroidNativeAssetSoundFontLoader(settings, context.assets)
-        // Still has some issue that callbacks are reset in the middle, more GC pinning is likely required.
+        // We should be able to use this alternatively, but it still has some issue that callbacks are reset in the middle, more GC pinning is likely required.
         //asset_sfloader = AndroidAssetSoundFontLoader(settings, context.assets)
         syn.addSoundFontLoader (asset_sfloader)
 
         for (sf in sfs)
             if (sf != null)
-                // FIXME: remove path hack
-                syn.loadSoundFont (/*predefined_temp_path + "/" + */sf, false)
+                syn.loadSoundFont (sf, false)
 
         adriver = AudioDriver (syn.getSettings(), syn)
         syn.systemReset()
