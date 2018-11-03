@@ -1,0 +1,5 @@
+<devices>
+    <device manufacturer="atsushieno" product="FluidMidiDeviceService">
+        <input-port name="Fluid MIDI input" />
+    </device>
+</devices>

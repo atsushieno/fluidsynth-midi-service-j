@@ -3,6 +3,7 @@
     package="name.atsushieno.fluidsynthmidideviceservicej">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-feature android:name="android.software.midi" android:required="true"/>
 
     <application
         android:allowBackup="true"
@@ -18,6 +19,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name="name.atsushieno.fluidsynthmidideviceservicej.FluidsynthMidiDeviceService"
+            android:permission="android.permission.BIND_MIDI_DEVICE_SERVICE">
+            <intent-filter>
+                <action android:name="android.media.midi.MidiDeviceService" />
+            </intent-filter>
+            <meta-data android:name="android.media.midi.MidiDeviceService"
+                android:resource="@xml/midi_device_info" />
+        </service>
     </application>
 
 </manifest>
