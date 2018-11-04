@@ -17,6 +17,7 @@ class FluidsynthMidiReceiver// float or 16bits
 {
     private val predefined_temp_path = "/data/local/tmp/name.atsushieno.fluidsynthmidideviceservice"
 
+    private val settings: Settings
     private val syn: Synth
     private val adriver: AudioDriver
     private val asset_sfloader: SoundFontLoader
@@ -26,7 +27,8 @@ class FluidsynthMidiReceiver// float or 16bits
     init {
         AndroidLogger.installAndroidLogger()
 
-        val settings = Settings ()
+        settings = Settings ()
+        settings.getEntry (ConfigurationKeys.SynthThreadSafeApi).setIntValue (0) // See https://github.com/atsushieno/fluidsynth-midi-service-j/issues/7
         settings.getEntry (ConfigurationKeys.AudioSampleFormat).setStringValue ("16bits")
         val manager = context.getSystemService (Context.AUDIO_SERVICE) as AudioManager
         settings.getEntry (ConfigurationKeys.SynthSampleRate).setDoubleValue (11025.toDouble())
@@ -59,6 +61,7 @@ class FluidsynthMidiReceiver// float or 16bits
         //asset_sfloader.close ()
         adriver.close ()
         syn.close ()
+        settings.close ()
         is_disposed = true
     }
 

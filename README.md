@@ -36,7 +36,7 @@ For comsumption in Java-based Android application, we use [JNA](https://github.c
 
 The rest of the Java application is written in Kotlin.
 
-## Prebuild binaries
+## Prebuilt binaries
 
 Right now there is no application package as the Java application does not
 really do anything yet.

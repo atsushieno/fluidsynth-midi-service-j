@@ -1,6 +1,9 @@
 package fluidsynth
 
+import java.nio.IntBuffer
 import com.sun.jna.ptr.PointerByReference
+import java.nio.ByteBuffer
+import java.nio.DoubleBuffer
 
 class Settings : FluidsynthObject
 {
@@ -54,14 +57,11 @@ class Settings : FluidsynthObject
         }
         */
 
-        /*ERROR
-        fun getStringValue () {
-
-            val v : PointerByReference? = null;
-            library.fluid_settings_getstr(handle, getName(), v);
-            return v;
+        fun getStringValue () : String {
+            val v = ByteBuffer.allocate(1024)
+            library.fluid_settings_copystr (handle, getName(), v, 1024)
+            return String(v.array())
         }
-        */
         fun setStringValue (v : String) {
             library.fluid_settings_setstr (handle, getName(), v)
         }
@@ -70,12 +70,12 @@ class Settings : FluidsynthObject
         {
         }
 
-        /*ERROR
         fun getIntDefault () : Int
         {
-            return library.fluid_settings_getint_default(handle, getName());
+            val v = IntBuffer.allocate(1)
+            library.fluid_settings_getint_default(handle, getName(), v);
+            return v [0]
         }
-        */
 
         /*ERROR
         fun getIntRange () : ValueRange<Int>
@@ -87,23 +87,21 @@ class Settings : FluidsynthObject
         }
         */
 
-        /*ERROR
         fun getIntValue () : Int {
-
-            var v : IntByReference? = null;
-            library.fluid_settings_getint (handle, getName(), v);
-            return if (v == null) getIntDefault() else v.value;
+            val v = IntBuffer.allocate(1)
+            library.fluid_settings_getint (handle, getName(), v)
+            return v [0]
         }
-        */
+
         fun setIntValue (v : Int) {
             library.fluid_settings_setint (handle, getName(), v)
         }
 
-        /*ERROR
         fun getDoubleDefault() : Double {
-            return library.fluid_settings_getnum_default(handle, getName());
+            val v = DoubleBuffer.allocate(1)
+            library.fluid_settings_getnum_default(handle, getName(), v)
+            return v [0]
         }
-        */
 
         /*ERROR
         fun getDoubleRange () : ValueRange<Double>
@@ -115,14 +113,13 @@ class Settings : FluidsynthObject
         }
         */
 
-        /*ERROR
         fun getDoubleValue () : Double {
 
-            var v : DoubleByReference? = null;
+            var v : DoubleBuffer? = null;
             library.fluid_settings_getnum (handle, getName(), v);
-            return if (v == null) getDoubleDefault() else v.value;
+            return if (v == null) getDoubleDefault() else v[0];
         }
-        */
+
         fun setDoubleValue (v : Double) {
             library.fluid_settings_setnum (handle, getName(), v)
         }
