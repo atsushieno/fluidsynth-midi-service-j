@@ -22,7 +22,16 @@ dummy output.
 
 More background can be found at https://dev.to/atsushieno/fluidsynth-20x-for-android-4j6b
 
-## Dependencies
+## Building
+
+Building the entire app is complicated because it needs to build fluidsynth for Android as well as generating automated Java API binding from libfluidsynth C headers.
+
+This is the basic build steps:
+
+- go to `fluidsynthjna` directory and run `make`.
+- then run `./gradlew assembleDebug` (etc.) to build Java (Kotlin) app.
+
+### Dependencies
 
 Currently it depends on atsushieno's own fork of fluidsynth which adds some
 Android build scripts, which in turn depends on [Cerbero build system](https://cgit.freedesktop.org/gstreamer/cerbero/) to build glib-2.0 and co, one of fluidsynth's dependencies.
@@ -41,7 +50,7 @@ The rest of the Java application is written in Kotlin.
 Right now there is no application package as the Java application does not
 really do anything yet.
 
-To avoid the most difficult part, building libfluidsynth.so with OpenSLES support, we have a set of prebuilt shared libraries so that anyone who just wants to build your own synthesizer apps can reuse it (there was a couple of inquiry and request them in the past):
+To avoid the most difficult part, building libfluidsynth.so with OpenSLES support, we have a set of prebuilt shared libraries so that anyone who just wants to build own synthesizer apps can reuse it (there was a couple of inquiry and request them in the past):
 https://www.dropbox.com/s/081mnfzhgavjb0y/android-fluidsynth-opensles-binaries-9a4c265.zip?dl=0
 
 
