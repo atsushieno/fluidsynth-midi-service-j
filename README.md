@@ -31,6 +31,8 @@ This is the basic build steps:
 - go to `fluidsynthjna` directory and run `make`.
 - then run `./gradlew assembleDebug` (etc.) to build Java (Kotlin) app.
 
+You will need make, wget, and Maven (mvn) installed too.
+
 ### Dependencies
 
 Currently it depends on atsushieno's own fork of fluidsynth which adds some
