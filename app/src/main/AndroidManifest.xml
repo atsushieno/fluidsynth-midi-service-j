@@ -25,7 +25,7 @@
                 <action android:name="android.media.midi.MidiDeviceService" />
             </intent-filter>
             <meta-data android:name="android.media.midi.MidiDeviceService"
-                android:resource="@xml/midi_device_info" />
+                android:resource="@xml/device_info" />
         </service>
     </application>
 
