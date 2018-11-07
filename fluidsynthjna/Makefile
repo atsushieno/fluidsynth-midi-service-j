@@ -62,3 +62,5 @@ fluidsynth:
 	mkdir -p src/main/jniLibs
 	cp -R ../external/fluidsynth/android/dist/* src/main/jniLibs
 
+clean:
+	cd ../external/fluidsynth/android && make -f Makefile.android clean
