@@ -29,7 +29,6 @@ class FluidsynthMidiReceiver// float or 16bits
 
         settings = Settings ()
         settings.getEntry (ConfigurationKeys.SynthThreadSafeApi).setIntValue (0) // See https://github.com/atsushieno/fluidsynth-midi-service-j/issues/7
-        settings.getEntry (ConfigurationKeys.AudioSampleFormat).setStringValue ("16bits")
         val manager = context.getSystemService (Context.AUDIO_SERVICE) as AudioManager
         settings.getEntry (ConfigurationKeys.SynthSampleRate).setDoubleValue (11025.toDouble())
         val framesPerBufferSpec = manager.getProperty (AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER)

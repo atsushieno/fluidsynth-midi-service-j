@@ -1,5 +1,5 @@
 <devices>
-    <device manufacturer="atsushieno" product="JFluidMidi">
+    <device name="JFluidMidi" manufacturer="atsushieno" product="JFluidMidi">
         <input-port name="input" />
     </device>
 </devices>

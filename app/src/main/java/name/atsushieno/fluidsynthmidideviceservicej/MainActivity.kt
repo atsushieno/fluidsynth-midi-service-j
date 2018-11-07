@@ -36,9 +36,7 @@ class MainActivity : AppCompatActivity() {
                 this.button_client.isEnabled = false
 
                 midi_manager = this.applicationContext.getSystemService(Context.MIDI_SERVICE) as MidiManager
-                for (dev in midi_manager.devices)
-                    System.out.println("" + dev.id + " " + dev.type + " " + dev)
-                val device = midi_manager.devices.first { d -> d.type == MidiDeviceInfo.TYPE_VIRTUAL && d.inputPortCount == 1 }
+                val device = midi_manager.devices.first { d -> d.properties.getString(MidiDeviceInfo.PROPERTY_PRODUCT).equals("JFluidMidi") }
                 midi_manager.openDevice(device, {
                     midi_input = it.openInputPort(0)
                     this.runOnUiThread { this.button_client.isEnabled = true }
