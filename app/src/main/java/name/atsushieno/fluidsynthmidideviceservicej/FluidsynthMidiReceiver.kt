@@ -30,6 +30,10 @@ class FluidsynthMidiReceiver// float or 16bits
         settings = Settings ()
         settings.getEntry (ConfigurationKeys.SynthThreadSafeApi).setIntValue (0) // See https://github.com/atsushieno/fluidsynth-midi-service-j/issues/7
         val manager = context.getSystemService (Context.AUDIO_SERVICE) as AudioManager
+        settings.getEntry (ConfigurationKeys.AudioDriver).setStringValue ("oboe")
+        //settings.getEntry (ConfigurationKeys.AudioSampleFormat).setStringValue ("float")
+        //settings.getEntry ("audio.oboe.sharing-mode").setStringValue("Exclusive")
+        //settings.getEntry ("audio.oboe.performance-mode").setStringValue("LowLatency")
         settings.getEntry (ConfigurationKeys.SynthSampleRate).setDoubleValue (11025.toDouble())
         val framesPerBufferSpec = manager.getProperty (AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER)
         val fpb = java.lang.Double.parseDouble (framesPerBufferSpec)

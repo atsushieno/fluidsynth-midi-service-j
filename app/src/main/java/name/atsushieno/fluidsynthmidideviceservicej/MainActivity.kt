@@ -56,10 +56,16 @@ class MainActivity : AppCompatActivity() {
         midi.send(arrayOf(0x90.toByte(), 0x44, 120).toByteArray(), 0, 3)
         midi.send(arrayOf(0x90.toByte(), 0x47, 120).toByteArray(), 0, 3)
         AsyncTask.execute {
-            Thread.sleep(5000)
+            Thread.sleep(500)
             midi.send(arrayOf(0x80.toByte(), 0x40, 0).toByteArray(), 0, 3)
             midi.send(arrayOf(0x80.toByte(), 0x44, 0).toByteArray(), 0, 3)
             midi.send(arrayOf(0x80.toByte(), 0x47, 0).toByteArray(), 0, 3)
+
+            midi.send(arrayOf(0x90.toByte(), 0x49, 120).toByteArray(), 0, 3)
+            AsyncTask.execute {
+                Thread.sleep(500)
+                midi.send(arrayOf(0x80.toByte(), 0x49, 0).toByteArray(), 0, 3)
+            }
         }
     }
 }

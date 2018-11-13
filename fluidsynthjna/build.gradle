@@ -4,7 +4,6 @@ apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 28
-
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28
@@ -14,29 +13,28 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
-
     // FIXME: make it conditional, strip for release builds
-    packagingOptions{
+    packagingOptions {
         doNotStrip "*/armeabi/libfluidsynth.so"
         doNotStrip "*/armeabi-v7a/libfluidsynth.so"
         doNotStrip "*/x86/libfluidsynth.so"
         doNotStrip "*/x86_64/libfluidsynth.so"
     }
-
     buildTypes {
         debug {
-                minifyEnabled false
+            minifyEnabled false
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    buildToolsVersion '28.0.3'
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation fileTree(dir: '.', include: ['fluidsynth.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['fluidsynth.jar'], dir: '.')
     implementation 'net.java.dev.jna:jna:4.5.2@aar'
     testImplementation 'junit:junit:4.12'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

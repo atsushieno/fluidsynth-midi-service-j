@@ -64,3 +64,7 @@ fluidsynth:
 
 clean:
 	cd ../external/fluidsynth/android && make -f Makefile.android clean
+	rm -rf src/main/jniLibs/*/*.so
+
+wipe-cerbero:
+	cd ../external/fluidsynth/android && make -f Makefile.android wipe
