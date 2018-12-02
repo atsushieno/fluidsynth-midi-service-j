@@ -15,10 +15,10 @@ android {
     }
     // FIXME: make it conditional, strip for release builds
     packagingOptions {
-        doNotStrip "*/armeabi/libfluidsynth.so"
-        doNotStrip "*/armeabi-v7a/libfluidsynth.so"
-        doNotStrip "*/x86/libfluidsynth.so"
-        doNotStrip "*/x86_64/libfluidsynth.so"
+        doNotStrip "*/armeabi/libfluidsynth*.so"
+        doNotStrip "*/armeabi-v7a/libfluidsynth*.so"
+        doNotStrip "*/x86/libfluidsynth*.so"
+        doNotStrip "*/x86_64/libfluidsynth*.so"
     }
     buildTypes {
         debug {
@@ -35,6 +35,7 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation fileTree(include: ['fluidsynth.jar'], dir: '.')
+    implementation fileTree(include: ['fluidsynth-assetloader.jar'], dir: '.')
     implementation 'net.java.dev.jna:jna:4.5.2@aar'
     testImplementation 'junit:junit:4.12'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

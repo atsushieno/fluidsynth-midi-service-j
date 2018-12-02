@@ -6,7 +6,7 @@ ANDROID_NDK = ~/android-sdk-linux/ndk-bundle
 
 SF2 = ../external/fluid-soundfont-3.1/FluidR3_GM.sf2
 
-all: libs/fluidsynth.jar fluidsynth prepare-sf2
+all: libs/fluidsynth.jar libs/fluidsynth-assetloader.jar fluidsynth prepare-sf2
 
 PHONY:
 prepare-fluidsynth:
@@ -53,7 +53,20 @@ libs/fluidsynth.jar: $(JNAERATOR_JAR)
 	$(FL_INC)/settings.h \
 	$(FL_INC)/shell.h \
 	$(FL_INC)/types.h \
-	$(FL_INC)/android.h \
+	&& \
+	cd ..
+
+libs/fluidsynth-assetloader.jar: $(JNAERATOR_JAR)
+	mkdir -p libs && cd libs && \
+	java -jar ../$(JNAERATOR_JAR) \
+	-I ../../external/fluidsynth/include/ \
+	-I $(ANDROID_NDK)/usr/include/ \
+	-library fluidsynth-assetloader \
+	-mode Jar \
+	-runtime JNA \
+	-f \
+	-skipDeprecated \
+	../../external/fluidsynth/android/fluidsynth-assetloader/fluid_androidasset.h \
 	&& \
 	cd ..
 
