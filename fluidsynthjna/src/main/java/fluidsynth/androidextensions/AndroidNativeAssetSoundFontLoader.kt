@@ -16,6 +16,7 @@ class NativeHandler
     {
         if (asset_manager_java == null) {
             System.loadLibrary("fluidsynth")
+            System.loadLibrary("fluidsynth-assetloader")
             asset_manager_java = assetManager
             setAssetManagerContext(assetManager)
         }
