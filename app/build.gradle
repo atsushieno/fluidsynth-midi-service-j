@@ -21,10 +21,10 @@ android {
     }
     // FIXME: make it conditional, strip for release builds
     packagingOptions {
-        doNotStrip "*/armeabi/libfluidsynth.so"
-        doNotStrip "*/armeabi-v7a/libfluidsynth.so"
-        doNotStrip "*/x86/libfluidsynth.so"
-        doNotStrip "*/x86_64/libfluidsynth.so"
+        doNotStrip "*/armeabi/libfluidsynth*.so"
+        doNotStrip "*/armeabi-v7a/libfluidsynth*.so"
+        doNotStrip "*/x86/libfluidsynth*.so"
+        doNotStrip "*/x86_64/libfluidsynth*.so"
     }
     buildTypes {
         debug {
@@ -36,14 +36,16 @@ android {
         }
     }
     externalNativeBuild {
+        /*
         cmake {
             path "CMakeLists.txt"
-        }
+        }*/
     }
     buildToolsVersion '28.0.3'
 }
 
 dependencies {
+    implementation 'net.java.dev.jna:jna:5.2.0@aar'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.android.support:appcompat-v7:28.0.0'

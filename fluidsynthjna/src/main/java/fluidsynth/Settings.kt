@@ -4,11 +4,12 @@ import java.nio.IntBuffer
 import com.sun.jna.ptr.PointerByReference
 import java.nio.ByteBuffer
 import java.nio.DoubleBuffer
+import fluidsynth.FluidsynthLibrary as library
 
 class Settings : FluidsynthObject
 {
     companion object {
-        var library: FluidsynthLibrary = FluidsynthLibrary.INSTANCE
+        var library = fluidsynth.FluidsynthLibrary.INSTANCE
     }
 
     constructor()

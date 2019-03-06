@@ -4,7 +4,7 @@ import android.content.res.AssetManager
 import com.sun.jna.JNIEnv
 import com.sun.jna.Pointer
 import com.sun.jna.ptr.PointerByReference
-import fluidsynth.FluidsynthLibrary
+import fluidsynth.FluidsynthLibrary as library
 import fluidsynth.Settings
 import fluidsynth.SoundFontLoader
 
@@ -23,7 +23,6 @@ class NativeHandler
     }
 
     companion object {
-        val library = FluidsynthLibrary.INSTANCE
         val library_assetloader = fluidsynthassetloader.FluidsynthAssetloaderLibrary.INSTANCE
 
         val INSTANCE = NativeHandler()

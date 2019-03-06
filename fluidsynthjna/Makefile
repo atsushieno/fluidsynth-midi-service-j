@@ -36,7 +36,7 @@ libs/fluidsynth.jar: $(JNAERATOR_JAR)
 	-library fluidsynth \
 	-mode Jar \
 	-runtime JNA \
-	-f \
+	-f -v \
 	-skipDeprecated \
 	$(FL_INC)/synth.h \
 	$(FL_INC)/sfont.h \
@@ -66,6 +66,7 @@ libs/fluidsynth-assetloader.jar: $(JNAERATOR_JAR)
 	-runtime JNA \
 	-f \
 	-skipDeprecated \
+	-noLibBundle \
 	../../external/fluidsynth/android/fluidsynth-assetloader/fluid_androidasset.h \
 	&& \
 	cd ..
@@ -77,7 +78,7 @@ fluidsynth:
 
 clean:
 	cd ../external/fluidsynth/android && make -f Makefile.android clean
-	rm -rf src/main/jniLibs/*/*.so
+	rm -rf src/main/jniLibs/*/*.so libs/*.jar libs/_jnaerator.*
 
 wipe-cerbero:
 	cd ../external/fluidsynth/android && make -f Makefile.android wipe

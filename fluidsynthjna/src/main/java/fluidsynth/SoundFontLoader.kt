@@ -3,10 +3,11 @@ package fluidsynth
 import com.sun.jna.NativeLong
 import com.sun.jna.Pointer
 import com.sun.jna.ptr.PointerByReference
+import fluidsynth.FluidsynthLibrary as library
 
 open class SoundFontLoader : FluidsynthObject {
     abstract class SoundFontLoaderLoadDelegate {
-        class NativeInvoker : FluidsynthLibrary.fluid_sfloader_load_t {
+        class NativeInvoker : library.fluid_sfloader_load_t {
             constructor(java: SoundFontLoaderLoadDelegate) {
                 this.java = java
             }
@@ -26,7 +27,7 @@ open class SoundFontLoader : FluidsynthObject {
     }
 
     abstract class SoundFontLoaderFreeDelegate {
-        class NativeInvoker : FluidsynthLibrary.fluid_sfloader_free_t {
+        class NativeInvoker : library.fluid_sfloader_free_t {
             constructor(java: SoundFontLoaderFreeDelegate) {
                 this.java = java
             }
@@ -62,7 +63,7 @@ open class SoundFontLoader : FluidsynthObject {
 
     companion object {
 
-        val library = FluidsynthLibrary.INSTANCE
+        var library = fluidsynth.FluidsynthLibrary.INSTANCE
 
         fun newDefaultSoundFontLoader(settings: Settings): SoundFontLoader {
             return SoundFontLoader(library.new_fluid_defsfloader(settings.getHandle()), true)

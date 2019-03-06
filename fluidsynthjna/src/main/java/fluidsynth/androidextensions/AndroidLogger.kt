@@ -1,13 +1,14 @@
 package fluidsynth.androidextensions
 
 import com.sun.jna.Pointer
-import fluidsynth.FluidsynthLibrary
+import fluidsynth.FluidsynthLibrary as library
 import fluidsynth.FluidsynthLibrary.fluid_log_level.*
 
-class AndroidLogger : FluidsynthLibrary.fluid_log_function_t {
+class AndroidLogger : library.fluid_log_function_t {
 
     companion object {
-        val library = FluidsynthLibrary.INSTANCE
+        var library = fluidsynth.FluidsynthLibrary.INSTANCE
+
         val java = AndroidLogger()
 
         fun installAndroidLogger() {

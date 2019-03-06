@@ -1,17 +1,17 @@
 package fluidsynth
 
-import fluidsynth.FluidsynthLibrary
+import fluidsynth.FluidsynthLibrary as library
 import fluidsynth.FluidsynthObject
 import fluidsynth.Settings
 import fluidsynth.Synth
 
 class AudioDriver : FluidsynthObject
 {
-    companion object {
-        val library = FluidsynthLibrary.INSTANCE
-    }
-
     //public delegate int AudioHandler (byte [] data, float [][] outBuffer);
+
+    companion object {
+        var library = fluidsynth.FluidsynthLibrary.INSTANCE
+    }
 
     constructor(settings : Settings, synth : Synth)
         : super (library.new_fluid_audio_driver (settings.getHandle(), synth.getHandle()), true)

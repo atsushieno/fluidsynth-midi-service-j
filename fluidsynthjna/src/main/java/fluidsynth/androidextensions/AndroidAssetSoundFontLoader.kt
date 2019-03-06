@@ -2,7 +2,7 @@ package fluidsynth.androidextensions
 
 import android.content.res.AssetManager
 import com.sun.jna.Pointer
-import fluidsynth.FluidsynthLibrary
+import fluidsynth.FluidsynthLibrary as library
 import fluidsynth.Settings
 import fluidsynth.SoundFontLoader
 import java.io.InputStream
@@ -13,6 +13,10 @@ import kotlin.collections.HashMap
  */
 class AndroidAssetSoundFontLoader : SoundFontLoader
 {
+    companion object {
+        var library = fluidsynth.FluidsynthLibrary.INSTANCE
+    }
+
     public val callbacks : AssetLoaderCallbacks
 
     constructor(settings : Settings, assetManager : AssetManager)
