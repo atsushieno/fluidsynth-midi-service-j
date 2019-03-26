@@ -380,14 +380,9 @@ enum class SeekFilterResult {
     BLOCK_AND_TERMINATE,
 }
 
-class SimpleSeekProcessor : SeekProcessor
+internal class SimpleSeekProcessor(ticks: Int) : SeekProcessor
 {
-    constructor (ticks: Int)
-    {
-        this.seek_to = ticks
-    }
-
-    private var seek_to: Int = 0
+    private var seek_to: Int = ticks
     private var current: Int = 0
 
     override fun filterMessage (message: MidiMessage ) : SeekFilterResult
