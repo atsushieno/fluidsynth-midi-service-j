@@ -1,133 +1,120 @@
 package name.atsushieno.ktmidi
 
-import java.io.InputStream
-import java.io.OutputStream
-
-abstract class MidiModuleDatabase
+class MidiMachine
 {
-    companion object {
-        val default : MidiModuleDatabase = DefaultMidiModuleDatabase ()
+    private val event_received_handlers = arrayListOf<OnMidiEventListener>()
 
+    fun addOnEventReceivedListener(listener: OnMidiEventListener)
+    {
+        event_received_handlers.add(listener)
     }
 
-    abstract fun all (): Iterable<MidiModuleDefinition>
+    fun removeOnEventReceivedListener(listener: OnMidiEventListener)
+    {
+        event_received_handlers.remove(listener)
+    }
 
-    abstract fun resolve (moduleName: String) :MidiModuleDefinition
+    var channels = Array<MidiMachineChannel> (16, { i -> MidiMachineChannel() })
+
+    fun processEvent (evt: MidiEvent)
+    {
+        when (evt.eventType) {
+            MidiEvent.NOTE_ON->
+            channels [evt.channel.toInt()].noteVelocity [evt.msb.toInt()] = evt.lsb
+
+            MidiEvent.NOTE_OFF->
+            channels [evt.channel.toInt()].noteVelocity [evt.msb.toInt()] = 0
+            MidiEvent.PAF->
+            channels [evt.channel.toInt()].pafVelocity [evt.msb.toInt()] = evt.lsb
+            MidiEvent.CC-> {
+                // FIXME: handle RPNs and NRPNs by DTE
+                when (evt.msb) {
+                    MidiCC.NRPN_MSB,
+                    MidiCC.NRPN_LSB ->
+                        channels[evt.channel.toInt()].dteTarget = DteTarget.NRPN
+                    MidiCC.RPN_MSB,
+                    MidiCC.RPN_LSB ->
+                        channels[evt.channel.toInt()].dteTarget = DteTarget.RPN
+
+                    MidiCC.DTE_MSB ->
+                        channels[evt.channel.toInt()].processDte(evt.lsb, true)
+                    MidiCC.DTE_LSB ->
+                        channels[evt.channel.toInt()].processDte(evt.lsb, false)
+                    MidiCC.DTE_INCREMENT ->
+                        channels[evt.channel.toInt()].processDteIncrement()
+                    MidiCC.DTE_DECREMENT ->
+                        channels[evt.channel.toInt()].processDteDecrement()
+                }
+                channels[evt.channel.toInt()].controls[evt.msb.toInt()] = evt.lsb
+            }
+            MidiEvent.PROGRAM->
+            channels [evt.channel.toInt()].program = evt.msb
+            MidiEvent.CAF->
+            channels [evt.channel.toInt()].caf = evt.msb
+            MidiEvent.PITCH ->
+            channels [evt.channel.toInt()].pitchbend = ((evt.msb.toInt() shl 7) + evt.lsb).toShort()
+        }
+        for (receiver in event_received_handlers)
+            receiver.onEvent (evt)
+    }
 }
 
-class MergedMidiModuleDatabase : MidiModuleDatabase
+class MidiMachineChannel
 {
-    constructor(sources: Iterable<MidiModuleDatabase>)
+    val noteVelocity = ByteArray(128)
+    val pafVelocity = ByteArray(128)
+    val controls = ByteArray(128)
+    val rpns = ShortArray(128) // only 5 should be used though
+    val nrpns = ShortArray(128)
+    var program : Byte = 0
+    var caf : Byte = 0
+    var pitchbend : Short = 8192
+    var dteTarget : DteTarget = DteTarget.RPN
+    private var dte_target_value : Byte = 0
+
+    val rpnTarget : Short
+        get () = ((controls [MidiCC.RPN_MSB.toInt()].toInt() shl 7) + controls [MidiCC.RPN_LSB.toInt()]).toShort()
+
+
+    fun processDte (value: Byte, isMsb: Boolean)
     {
-        list = arrayListOf<MidiModuleDatabase> ()
+        var arr : ShortArray
+        when (dteTarget) {
+            DteTarget.RPN-> {
+                dte_target_value = controls[(if (isMsb) MidiCC.RPN_MSB else MidiCC.RPN_LSB).toInt()]
+                arr = rpns
+            }
+            DteTarget.NRPN-> {
+                dte_target_value = controls[(if (isMsb) MidiCC.NRPN_MSB else MidiCC.NRPN_LSB).toInt()]
+                arr = nrpns
+            }
+        }
+        var cur = arr [dte_target_value.toInt()].toInt()
+        if (isMsb)
+            arr [dte_target_value.toInt()] = (cur and 0x007F + ((value.toInt() and 0x7F) shl 7)).toShort()
+        else
+        arr [dte_target_value.toInt()] = (cur and 0x3FF0 + (value.toInt() and 0x7F)).toShort()
     }
 
-    val list: List<MidiModuleDatabase>
-
-    override fun all(): Iterable<MidiModuleDefinition>
+    fun processDteIncrement ()
     {
-        return list.flatMap { d -> d.all() }
-    }
-
-    override fun resolve(moduleName: String): MidiModuleDefinition {
-        return list.map { d -> d.resolve (moduleName)}.first ()
-    }
-}
-
-class DefaultMidiModuleDatabase : MidiModuleDatabase
-{
-    companion object {
-
-        /*
-    static readonly Assembly ass = typeof (DefaultMidiModuleDatabase).GetTypeInfo ().Assembly;
-
-    // am too lazy to adjust resource names :/
-    public static Stream GetResource (string name)
-    {
-        return ass.GetManifestResourceStream (name) ?? ass.GetManifestResourceStream (
-        ass.GetManifestResourceNames ().FirstOrDefault (m =>
-        m.EndsWith (name, StringComparison.OrdinalIgnoreCase)));
-    }
-    */
-        fun getResource(name: String): InputStream {
-            throw NotImplementedError()
+        when (dteTarget) {
+            DteTarget.RPN -> rpns [dte_target_value.toInt()]++
+            DteTarget.NRPN -> nrpns [dte_target_value.toInt()]++
         }
     }
 
-    constructor()
+    fun processDteDecrement ()
     {
-        modules = arrayListOf<MidiModuleDefinition> ();
-        var catalog = java.io.InputStreamReader(getResource ("midi-module-catalog.txt")).readText().split ('\n');
-        for (filename in catalog)
-        if (filename.length > 0)
-            modules.add (MidiModuleDefinition.load (getResource (filename)));
-    }
-
-    override fun all() : Iterable<MidiModuleDefinition> { return modules }
-
-    override fun resolve(moduleName: String) : MidiModuleDefinition
-    {
-        var name = resolvePossibleAlias (moduleName);
-        return modules.first {m -> m.name == name} ?: modules.first { m -> m.match != null && Regex.fromLiteral (m.match!!).matches(name) || name.contains (m.name!!)}
-    }
-
-    fun resolvePossibleAlias (name: String) : String
-    {
-        when (name) {
-            "Microsoft GS Wavetable Synth" -> return "Microsoft GS Wavetable SW Synth";
-        }
-        return name;
-    }
-
-    val modules : List<MidiModuleDefinition>
-}
-
-class MidiModuleDefinition {
-    var name: String? = null
-
-    var match: String? = null
-
-    var instrument = MidiInstrumentDefinition()
-
-    // serialization
-
-    fun save(stream: OutputStream) {
-        throw NotImplementedError()
-        //var ds = new DataContractJsonSerializer (typeof (MidiModuleDefinition));
-        //ds.WriteObject (stream, this);
-    }
-
-    companion object {
-
-        fun load(stream: InputStream): MidiModuleDefinition {
-            throw NotImplementedError()
-            //var ds = new DataContractJsonSerializer (typeof (MidiModuleDefinition));
-            //return (MidiModuleDefinition) ds.ReadObject (stream);
+        when (dteTarget) {
+            DteTarget.RPN -> rpns [dte_target_value.toInt()]--
+            DteTarget.NRPN -> nrpns [dte_target_value.toInt()]--
         }
     }
 }
 
-class MidiInstrumentDefinition {
-    var maps = arrayListOf<MidiInstrumentMap>()
-
-    var drumMaps = arrayListOf<MidiInstrumentMap>()
-}
-
-class MidiInstrumentMap {
-    var name: String? = null
-
-    var programs = arrayListOf<MidiProgramDefinition>()
-}
-
-class MidiProgramDefinition {
-    var name: String? = null
-    var index: Int = 0
-
-    var banks = arrayListOf<MidiBankDefinition>()
-}
-
-class MidiBankDefinition {
-    var name: String? = null
-    var msb: Int = 0
-    var lsb: Int = 0
+enum class DteTarget
+{
+    RPN,
+    NRPN
 }
