@@ -3,6 +3,7 @@
 JNAERATOR_JAR = ../external/JNAerator/jnaerator/target/jnaerator-0.13-SNAPSHOT-shaded.jar
 FL_INC = ../../external/fluidsynth/include/fluidsynth
 ANDROID_NDK = ~/android-sdk-linux/ndk-bundle
+FL_ANDROID = ../external/fluidsynth/doc/android
 
 SF2 = ../external/fluid-soundfont-3.1/FluidR3_GM.sf2
 
@@ -10,7 +11,7 @@ all: libs/fluidsynth.jar libs/fluidsynth-assetloader.jar fluidsynth prepare-sf2
 
 PHONY:
 prepare-fluidsynth:
-	cd ../external/fluidsynth/android && make -f Makefile.android prepare
+	cd $(FL_ANDROID) && make -f Makefile.android prepare
 
 PHONY:
 prepare-sf2: $(SF2)
@@ -67,18 +68,18 @@ libs/fluidsynth-assetloader.jar: $(JNAERATOR_JAR)
 	-f \
 	-skipDeprecated \
 	-noLibBundle \
-	../../external/fluidsynth/android/fluidsynth-assetloader/fluid_androidasset.h \
+	../$(FL_ANDROID)/fluidsynth-assetloader/fluid_androidasset.h \
 	&& \
 	cd ..
 
 fluidsynth:
-	cd ../external/fluidsynth/android && make -f Makefile.android all || echo "ignore this failure..." && make -f Makefile.android dist
+	cd $(FL_ANDROID) && make -f Makefile.android all || echo "ignore this failure..." && make -f Makefile.android dist
 	mkdir -p src/main/jniLibs
-	cp -R ../external/fluidsynth/android/dist/* src/main/jniLibs
+	cp -R $(FL_ANDROID)/dist/* src/main/jniLibs
 
 clean:
-	cd ../external/fluidsynth/android && make -f Makefile.android clean
+	cd $(FL_ANDROID) && make -f Makefile.android clean
 	rm -rf src/main/jniLibs/*/*.so libs/*.jar libs/_jnaerator.*
 
 wipe-cerbero:
-	cd ../external/fluidsynth/android && make -f Makefile.android wipe
+	cd $(FL_ANDROID) && make -f Makefile.android wipe
