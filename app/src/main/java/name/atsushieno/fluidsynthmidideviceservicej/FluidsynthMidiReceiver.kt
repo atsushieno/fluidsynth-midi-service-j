@@ -31,6 +31,7 @@ class FluidsynthMidiReceiver// float or 16bits
         settings = Settings ()
         settings.getEntry (ConfigurationKeys.SynthThreadSafeApi).setIntValue (0) // See https://github.com/atsushieno/fluidsynth-midi-service-j/issues/7
         val manager = context.getSystemService (Context.AUDIO_SERVICE) as AudioManager
+        settings.getEntry (ConfigurationKeys.SynthGain).setDoubleValue (0.5) // See https://github.com/atsushieno/fluidsynth-midi-service-j/issues/7
         //settings.getEntry (ConfigurationKeys.AudioDriver).setStringValue ("opensles")
         //settings.getEntry (ConfigurationKeys.AudioSampleFormat).setStringValue ("float")
         //settings.getEntry ("audio.oboe.sharing-mode").setStringValue("Exclusive")
