@@ -5,23 +5,13 @@ FL_INC = ../../external/fluidsynth/include/fluidsynth
 ANDROID_NDK = ~/android-sdk-linux/ndk-bundle
 FL_ANDROID = ../external/fluidsynth/doc/android
 
-SF2 = ../external/fluid-soundfont-3.1/FluidR3_GM.sf2
+SF3 = src/main/assets/FluidR3Mono_GM.sf3
 
-all: libs/fluidsynth.jar libs/fluidsynth-assetloader.jar fluidsynth prepare-sf2
+all: libs/fluidsynth.jar libs/fluidsynth-assetloader.jar fluidsynth
 
 .PHONY: prepare-fluidsynth
 prepare-fluidsynth:
 	cd $(FL_ANDROID) && make -f Makefile.android prepare
-
-.PHONY: prepare-sf2
-prepare-sf2: $(SF2)
-	mkdir -p src/main/assets && cp ../external/fluid-soundfont-3.1/FluidR3_GM.sf2 src/main/assets
-
-$(SF2): fluid-soundfont_3.1.orig.tar.gz
-	cd ../external && tar zxvf ../fluidsynthjna/fluid-soundfont_3.1.orig.tar.gz && cd ../fluidsynthjna
-
-fluid-soundfont_3.1.orig.tar.gz:
-	wget http://http.debian.net/debian/pool/main/f/fluid-soundfont/fluid-soundfont_3.1.orig.tar.gz || (rm fluid-soundfont_3.1.orig.tar.gz && exit 1)
 
 $(JNAERATOR_JAR): jnaerator.stamp
 	cd ../external/JNAerator && mvn clean install && cd ../..

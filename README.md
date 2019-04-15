@@ -16,9 +16,7 @@ to port to Android. It is written in C with a handful of C library dependencies.
 
 There are some people who build Fluidsynth for Android, but what makes
 this port special is that it also provides audible driver sources, not just
-dummy output.
-
-(Currently it is done using [OpenSL ES API](https://developer.android.com/ndk/guides/audio/opensl/). There is an [ongoing effort](https://github.com/atsushieno/fluidsynth-midi-service-j/issues/6) to support [Oboe Audio API](https://github.com/google/Oboe).)
+dummy output. It makes use of [OpenSL ES API](https://developer.android.com/ndk/guides/audio/opensl/) as well as [Oboe Audio API](https://github.com/google/Oboe). Both are now based on Fluidsynth master, as my patches are now merged there.
 
 More background can be found at https://dev.to/atsushieno/fluidsynth-20x-for-android-4j6b
 
@@ -36,13 +34,10 @@ You will need make, wget, and Maven (mvn) installed too.
 
 ### Dependencies
 
-Currently it depends on atsushieno's own fork of fluidsynth which adds some
+It depends on official [fluidsynth github repo](https://github.com/Fluidsynth/fluidsynth) which now contains some
 Android build scripts, which in turn depends on [Cerbero build system](https://cgit.freedesktop.org/gstreamer/cerbero/) to build glib-2.0 and co, one of fluidsynth's dependencies.
 
-The fluidsynth fork branch for OpenSLES support is found at https://github.com/atsushieno/fluidsynth-fork/tree/opensles-v2 .
-
-It also downloads FluidR3_G* soundfonts which is OSS-friendlily released.
-Those sf2 files are bundled into apk as Android assets.
+It bundles `FluidR3Mono_GM.sf3` which is bundled into apk as Android assets. It is released under MIT license (see the source directory).
 
 For comsumption in Java-based Android application, we use [JNA](https://github.com/java-native-access/jna) and [JNAerator](https://github.com/nativelibs4java/JNAerator) to provide Java binding for libfluidsynth API.
 
@@ -51,9 +46,8 @@ The rest of the Java application is written in Kotlin.
 ## Prebuilt binaries
 
 Right now there is no application package as the Java application does not
-really do anything yet.
+do much yet.
 
-To avoid the most difficult part, building libfluidsynth.so with OpenSLES support, we have a set of prebuilt shared libraries so that anyone who just wants to build own synthesizer apps can reuse it (there was a couple of inquiry and request them in the past):
-https://www.dropbox.com/s/081mnfzhgavjb0y/android-fluidsynth-opensles-binaries-9a4c265.zip?dl=0
-
+To avoid the most difficult part, building libfluidsynth.so with OpenSLES support, we have a set of prebuilt shared libraries so that anyone who just wants to build own synthesizer apps can reuse it: see
+https://github.com/atsushieno/fluidsynth-midi-service-j/issues/12
 
