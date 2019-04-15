@@ -58,6 +58,7 @@ class FluidsynthMidiDeviceService : MidiDeviceService(), LifecycleOwner
 
     @SuppressWarnings("deprecation")
     override fun onStart(intent: Intent?, startId: Int) {
+        dispatcher.onServicePreSuperOnStart();
         super.onStart(intent, startId)
     }
 
