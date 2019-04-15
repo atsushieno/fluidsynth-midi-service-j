@@ -9,11 +9,11 @@ SF2 = ../external/fluid-soundfont-3.1/FluidR3_GM.sf2
 
 all: libs/fluidsynth.jar libs/fluidsynth-assetloader.jar fluidsynth prepare-sf2
 
-PHONY:
+.PHONY: prepare-fluidsynth
 prepare-fluidsynth:
 	cd $(FL_ANDROID) && make -f Makefile.android prepare
 
-PHONY:
+.PHONY: prepare-sf2
 prepare-sf2: $(SF2)
 	mkdir -p src/main/assets && cp ../external/fluid-soundfont-3.1/FluidR3_GM.sf2 src/main/assets
 
@@ -72,8 +72,11 @@ libs/fluidsynth-assetloader.jar: $(JNAERATOR_JAR)
 	&& \
 	cd ..
 
+.PHONY: fluidsynth
 fluidsynth:
-	cd $(FL_ANDROID) && make -f Makefile.android all || echo "ignore this failure..." && make -f Makefile.android dist
+	cd $(FL_ANDROID) && \
+	make -f Makefile.android all || echo "ignore this failure..." && \
+	make -f Makefile.android dist
 	mkdir -p src/main/jniLibs
 	cp -R $(FL_ANDROID)/dist/* src/main/jniLibs
 
