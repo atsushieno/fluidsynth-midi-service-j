@@ -12,8 +12,7 @@ import fluidsynth.Synth
 import fluidsynth.androidextensions.AndroidAssetSoundFontLoader
 
 
-class FluidsynthMidiReceiver// float or 16bits
-(context: Context) : MidiReceiver()
+class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
 {
     private val predefined_temp_path = "/data/local/tmp/name.atsushieno.fluidsynthmidideviceservice"
 

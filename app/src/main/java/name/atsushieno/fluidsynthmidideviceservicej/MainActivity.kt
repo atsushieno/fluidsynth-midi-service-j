@@ -1,5 +1,9 @@
 package name.atsushieno.fluidsynthmidideviceservicej
 
+import android.arch.lifecycle.Lifecycle
+import android.arch.lifecycle.LifecycleObserver
+import android.arch.lifecycle.LifecycleOwner
+import android.arch.lifecycle.OnLifecycleEvent
 import android.content.Context
 import android.media.midi.MidiDeviceInfo
 import android.media.midi.MidiInputPort
@@ -8,17 +12,34 @@ import android.media.midi.MidiReceiver
 import android.os.AsyncTask
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), LifecycleObserver {
 
     lateinit var midi : FluidsynthMidiReceiver
     lateinit var midi_manager : MidiManager
-    lateinit var midi_input : MidiInputPort
+    var midi_input : MidiInputPort? = null
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    fun onLifecycleStop () { disposeInput() }
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    fun onLifecycleDestroy () { disposeInput() }
+
+    fun disposeInput()
+    {
+        if (midi_input != null) {
+            Log.d("FluidsynthMidiService", "[MainActivity] disposed midi input")
+            midi_input?.close()
+            midi_input = null
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        lifecycle.addObserver(this)
 
         this.button_direct.setOnClickListener {
             this.button_direct.isEnabled = false
@@ -40,11 +61,11 @@ class MainActivity : AppCompatActivity() {
                 midi_manager.openDevice(device, {
                     midi_input = it.openInputPort(0)
                     this.runOnUiThread { this.button_client.isEnabled = true }
-                    play_client_midi(midi_input)
+                    play_client_midi(midi_input!!)
                 }, null)
             }
             else
-                play_client_midi(midi_input)
+                play_client_midi(midi_input!!)
         }
     }
 
