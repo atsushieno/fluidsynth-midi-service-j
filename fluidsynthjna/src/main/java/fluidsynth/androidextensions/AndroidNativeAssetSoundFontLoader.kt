@@ -18,6 +18,7 @@ class NativeHandler
 
         var asset_manager_java : AssetManager? = null
 
+        @JvmStatic
         external fun setAssetManagerContext(assetManager: AssetManager)
 
         fun getAssetSfLoader(settings : Settings, assetManager : AssetManager) : PointerByReference

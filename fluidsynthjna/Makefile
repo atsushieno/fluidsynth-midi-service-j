@@ -7,7 +7,7 @@ FL_ANDROID = ../external/fluidsynth/doc/android
 
 SF3 = src/main/assets/FluidR3Mono_GM.sf3
 
-all: libs/fluidsynth.jar libs/fluidsynth-assetloader.jar libs/fluidsynth-android-amidi.jar fluidsynth
+all: libs/fluidsynth.jar libs/fluidsynth-assetloader.jar libs/fluidsynth-android-amidi.jar dummy-amidi fluidsynth
 
 .PHONY: prepare-fluidsynth
 prepare-fluidsynth:
@@ -76,6 +76,10 @@ libs/fluidsynth-android-amidi.jar: $(JNAERATOR_JAR)
 	../$(FL_ANDROID)/fluidsynth-android-amidi/fluid_android_amidi.h \
 	&& \
 	cd ..
+
+.PHONY: dummy-amidi
+dummy-amidi:
+	cd dummy-amidi && ./ext-build.sh
 
 .PHONY: fluidsynth
 fluidsynth:
