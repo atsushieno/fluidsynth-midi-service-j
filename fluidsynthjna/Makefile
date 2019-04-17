@@ -73,7 +73,7 @@ libs/fluidsynth-android-amidi.jar: $(JNAERATOR_JAR)
 	-f \
 	-skipDeprecated \
 	-noLibBundle \
-	../../external/fluidsynth/android/fluidsynth-android-amidi/fluid_android_amidi.h \
+	../$(FL_ANDROID)/fluidsynth-android-amidi/fluid_android_amidi.h \
 	&& \
 	cd ..
 
