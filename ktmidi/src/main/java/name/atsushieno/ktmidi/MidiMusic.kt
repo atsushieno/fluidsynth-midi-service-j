@@ -98,7 +98,7 @@ class MidiMusic {
 class MidiTrack
 {
     constructor ()
-        : this (ArrayList<MidiMessage> ())
+            : this (ArrayList<MidiMessage> ())
 
     constructor(messages : MutableList<MidiMessage>?)
     {
@@ -288,11 +288,11 @@ class MidiEvent
         }
 
         fun fixedDataSize (statusByte : Byte) : Byte =
-            when ((statusByte.toInt() and 0xF0).toByte()) {
-            0xF0.toByte() -> 0 // including 0xF7, 0xFF
-            PROGRAM, CAF -> 1
-            else -> 2
-            }
+                when ((statusByte.toInt() and 0xF0).toByte()) {
+                    0xF0.toByte() -> 0 // including 0xF7, 0xFF
+                    PROGRAM, CAF -> 1
+                    else -> 2
+                }
     }
 
     constructor (value : Int)
@@ -315,12 +315,12 @@ class MidiEvent
     val statusByte : Byte = (value and 0xFF).toByte()
 
     val eventType : Byte =
-        when (statusByte) {
-            META,
-            SYSEX,
-            SYSEX_2 -> this.statusByte
-            else ->(value and 0xF0).toByte()
-        }
+            when (statusByte) {
+                META,
+                SYSEX,
+                SYSEX_2 -> this.statusByte
+                else ->(value and 0xF0).toByte()
+            }
 
     val msb : Byte = ((value and 0xFF00) shr 8).toByte()
 
@@ -720,10 +720,10 @@ class SmfParserException : Exception
 class SmfTrackMerger(private var source: MidiMusic) {
     companion object {
 
-    fun merge (source : MidiMusic) : MidiMusic
-    {
-        return SmfTrackMerger (source).getMergedMessages ()
-    }
+        fun merge (source : MidiMusic) : MidiMusic
+        {
+            return SmfTrackMerger (source).getMergedMessages ()
+        }
     }
 
     // FIXME: it should rather be implemented to iterate all

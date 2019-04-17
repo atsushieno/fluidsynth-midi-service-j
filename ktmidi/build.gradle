@@ -2,6 +2,10 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
+repositories {
+    jcenter()
+}
+
 android {
     compileSdkVersion 28
 
@@ -27,6 +31,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation "org.jetbrains.kotlinx:kotlinx-io-jvm:0.1.7"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
 
     implementation 'com.android.support:appcompat-v7:28.0.0'
     testImplementation 'junit:junit:4.12'
