@@ -30,7 +30,7 @@ class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
         val manager = context.getSystemService (Context.AUDIO_SERVICE) as AudioManager
         settings.getEntry (ConfigurationKeys.SynthGain).setDoubleValue (1.0) // See https://github.com/atsushieno/fluidsynth-midi-service-j/issues/7
         //settings.getEntry (ConfigurationKeys.AudioDriver).setStringValue ("opensles")
-        settings.getEntry (ConfigurationKeys.AudioSampleFormat).setStringValue ("float")
+        //settings.getEntry (ConfigurationKeys.AudioSampleFormat).setStringValue ("float")
         //settings.getEntry ("audio.oboe.sharing-mode").setStringValue("Exclusive")
         //settings.getEntry ("audio.oboe.performance-mode").setStringValue("LowLatency")
         //settings.getEntry (ConfigurationKeys.SynthSampleRate).setDoubleValue (11025.toDouble())
