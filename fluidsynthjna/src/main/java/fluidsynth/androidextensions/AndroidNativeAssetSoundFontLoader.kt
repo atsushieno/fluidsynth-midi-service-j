@@ -2,6 +2,7 @@ package fluidsynth.androidextensions
 
 import android.content.res.AssetManager
 import com.sun.jna.ptr.PointerByReference
+import fluidsynth.FluidsynthInteropException
 import fluidsynth.FluidsynthLibrary as library
 import fluidsynth.Settings
 import fluidsynth.SoundFontLoader
@@ -18,7 +19,10 @@ class NativeHandler
             asset_manager_java = assetManager
             setAssetManagerContext(assetManager)
         }
-        return library_assetloader.new_fluid_android_asset_sfloader(settings.getHandle(), null)
+        var ret = library_assetloader.new_fluid_android_asset_sfloader(settings.getHandle(), null)
+        if (ret == null)
+            throw FluidsynthInteropException ("Failed to get native asset soundfont loader")
+        return ret
     }
 
     companion object {

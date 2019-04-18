@@ -36,10 +36,8 @@ android {
         }
     }
     externalNativeBuild {
-        /*
         cmake {
-            path "CMakeLists.txt"
-        }*/
+        }
     }
     buildToolsVersion '28.0.3'
 }

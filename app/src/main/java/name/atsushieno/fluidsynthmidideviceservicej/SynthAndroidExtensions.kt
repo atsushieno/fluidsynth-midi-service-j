@@ -18,7 +18,7 @@ class SynthAndroidExtensions
 
             // Assets
             for (asset in context.assets.list(""))
-                if (asset.endsWith(".sf2")) // FIXME: case
+                if (asset.endsWith(".sf2", true) || asset.endsWith(".sf3", true))
                     soundFonts.add(asset)
             // temporary local files for debugging
             if (predefinedTempPath != null) {
