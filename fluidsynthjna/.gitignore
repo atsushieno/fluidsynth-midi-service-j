@@ -1,5 +1,7 @@
 /build
-fluidsynth.jar
+libs/fluidsynth.jar
+libs/fluidsynth-assetloader.jar
+libs/fluidsynth-android-amidi.jar
 jnaerator.stamp
 src/main/jniLibs
 fluid-soundfont_3.1.orig.tar.gz
