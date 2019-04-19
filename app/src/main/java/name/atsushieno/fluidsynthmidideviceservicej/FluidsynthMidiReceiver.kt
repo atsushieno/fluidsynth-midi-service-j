@@ -9,7 +9,6 @@ import fluidsynth.AudioDriver
 import fluidsynth.Settings
 import fluidsynth.SoundFontLoader
 import fluidsynth.Synth
-import fluidsynth.androidextensions.AndroidAssetSoundFontLoader
 
 
 class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
@@ -71,23 +70,50 @@ class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
         // FIXME: consider timestamp
         if (msg == null)
             throw IllegalArgumentException ("null msg")
-        val ch = msg[offset].toInt() and 0x0F
-        when (msg[offset].toInt() and 0xF0) {
-            0x80 -> syn.noteOff(ch, msg[offset + 1].toInt())
-            0x90 -> {
-                if (msg[offset + 2].toInt() == 0)
-                    syn.noteOff(ch, msg[offset + 1].toInt())
-                else
-                    syn.noteOn(ch, msg[offset + 1].toInt(), msg[offset + 2].toInt())
+        var off = offset
+        var c = count
+        var runningStatus = 0
+        while (c > 0) {
+            var stat = msg[off].toUByte().toInt()
+            if (stat < 0x80) {
+                stat = runningStatus
+            } else {
+                off++
+                c--
             }
-            0xA0 -> {
-                // No PAf in fluidsynth?
+            runningStatus = stat
+            val ch = stat and 0x0F
+            when (stat and 0xF0) {
+                0x80 -> syn.noteOff(ch, msg[off].toInt())
+                0x90 -> {
+                    if (msg[off + 1].toInt() == 0)
+                        syn.noteOff(ch, msg[off].toInt())
+                    else
+                        syn.noteOn(ch, msg[off].toInt(), msg[off + 1].toInt())
+                }
+                0xA0 -> {
+                    // No PAf in fluidsynth?
+                }
+                0xB0 -> syn.cc(ch, msg[off].toInt(), msg[off + 1].toInt())
+                0xC0 -> syn.programChange(ch, msg[off].toInt())
+                0xD0 -> syn.channelPressure(ch, msg[off].toInt())
+                0xE0 -> syn.pitchBend(ch, msg[off] + msg[off + 1] * 0x80)
+                0xF0 -> syn.sysex(msg.copyOfRange(off, c - 1), null)
             }
-            0xB0 -> syn.cc(ch, msg[offset + 1].toInt(), msg[offset + 2].toInt())
-            0xC0 -> syn.programChange(ch, msg[offset + 1].toInt())
-            0xD0 -> syn.channelPressure(ch, msg[offset + 1].toInt())
-            0xE0 -> syn.pitchBend(ch, msg[offset + 1] + msg[offset + 2] * 0x80)
-            0xF0 -> syn.sysex(msg.copyOfRange(offset, count), null)
+            when (stat and 0xF0) {
+                0xC0,0xD0 -> {
+                    off++
+                    c--
+                }
+                0xF0 -> {
+                    off += c - 1
+                    c = 0
+                }
+                else -> {
+                    off += 2
+                    c -= 2
+                }
+            }
         }
     }
 }
