@@ -1,6 +1,7 @@
 package fluidsynth
 
 import com.sun.jna.Pointer
+import com.sun.jna.ptr.PointerByReference
 
 
 class MidiDriver(settings: Settings, handler: MidiEventHandler) : FluidsynthObject(library.new_fluid_midi_driver(settings.getHandle(), HandleMidiEventFunc(handler), Pointer.NULL), true)
@@ -8,14 +9,6 @@ class MidiDriver(settings: Settings, handler: MidiEventHandler) : FluidsynthObje
     interface MidiEventHandler
     {
         fun process(event: MidiEvent) : Int
-    }
-
-    // TODO
-    class MidiEvent
-    {
-        constructor(evt: Pointer)
-        {
-        }
     }
 
     class HandleMidiEventFunc : FluidsynthLibrary.handle_midi_event_func_t
@@ -32,7 +25,7 @@ class MidiDriver(settings: Settings, handler: MidiEventHandler) : FluidsynthObje
         }
 
         override fun apply(data: Pointer, evt: Pointer) : Int {
-            return handler.process(MidiEvent(evt))
+            return handler.process(MidiEvent(PointerByReference(evt)))
         }
     }
 
@@ -45,3 +38,4 @@ class MidiDriver(settings: Settings, handler: MidiEventHandler) : FluidsynthObje
         library.delete_fluid_midi_driver(getHandle())
     }
 }
+
