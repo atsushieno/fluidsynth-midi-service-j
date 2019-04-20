@@ -7,7 +7,7 @@ FL_ANDROID = ../external/fluidsynth/doc/android
 
 SF3 = src/main/assets/FluidR3Mono_GM.sf3
 
-all: libs/fluidsynth.jar libs/fluidsynth-assetloader.jar libs/fluidsynth-android-amidi.jar fluidsynth
+all: libs/fluidsynth.jar libs/fluidsynth-assetloader.jar fluidsynth
 
 .PHONY: prepare-fluidsynth
 prepare-fluidsynth:
@@ -59,21 +59,6 @@ libs/fluidsynth-assetloader.jar: $(JNAERATOR_JAR)
 	-skipDeprecated \
 	-noLibBundle \
 	../$(FL_ANDROID)/fluidsynth-assetloader/fluid_androidasset.h \
-	&& \
-	cd ..
-
-libs/fluidsynth-android-amidi.jar: $(JNAERATOR_JAR)
-	mkdir -p libs && cd libs && \
-	java -jar ../$(JNAERATOR_JAR) \
-	-I ../../external/fluidsynth/include/ \
-	-I $(ANDROID_NDK)/usr/include/ \
-	-library fluidsynth-android-amidi \
-	-mode Jar \
-	-runtime JNA \
-	-f \
-	-skipDeprecated \
-	-noLibBundle \
-	../$(FL_ANDROID)/fluidsynth-android-amidi/fluid_android_amidi.h \
 	&& \
 	cd ..
 

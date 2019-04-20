@@ -9,9 +9,6 @@ import fluidsynth.Synth
 
 class NativeHandler
 {
-    external fun getAMidiDevice(midiDevice: MidiDevice) : PointerByReference
-    external fun releaseAMidiDevice(amidiDevice: PointerByReference)
-
     external fun setAssetManagerContext(assetManager: AssetManager)
 
     fun getAssetSfLoader(settings : Settings, assetManager : AssetManager) : PointerByReference
@@ -30,14 +27,8 @@ class NativeHandler
 
     companion object {
         val library_assetloader = fluidsynthassetloader.FluidsynthAssetloaderLibrary.INSTANCE
-        val library_amidi = fluidsynthandroidamidi.FluidsynthAndroidAmidiLibrary.INSTANCE
 
         val INSTANCE = NativeHandler()
         var asset_manager_java : AssetManager? = null
-
-        fun  connectMidiDriverToSynth (settings: Settings, synth: Synth, amidi: AMidi)
-        {
-            library_amidi.fluid_android_connect_midi_driver_to_synth(settings.getHandle(), synth.getHandle(), amidi.getHandle().pointer)
-        }
     }
 }
