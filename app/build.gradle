@@ -19,6 +19,9 @@ android {
             }
         }
     }
+    aaptOptions {
+        noCompress 'sf3'
+    }
     // FIXME: make it conditional, strip for release builds
     packagingOptions {
         doNotStrip "*/armeabi/libfluidsynth*.so"
@@ -36,10 +39,8 @@ android {
         }
     }
     externalNativeBuild {
-        /*
         cmake {
-            path "CMakeLists.txt"
-        }*/
+        }
     }
     buildToolsVersion '28.0.3'
 }
