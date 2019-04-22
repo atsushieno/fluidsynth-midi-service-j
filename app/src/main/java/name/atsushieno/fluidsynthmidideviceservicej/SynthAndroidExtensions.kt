@@ -8,7 +8,7 @@ import java.io.File
 class SynthAndroidExtensions
 {
     companion object {
-        fun getSoundFonts (soundFonts : MutableList<String?>, context : Context, predefinedTempPath : String?) {
+        fun getSoundFonts (soundFonts : MutableList<String>, context : Context, predefinedTempPath : String?) {
             // OBB support
             val obbMgr = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
             val obbs = context.obbDirs.flatMap { d -> d.listFiles { f -> f.extension == "obb" }.asIterable() } // FIXME: case
@@ -25,7 +25,7 @@ class SynthAndroidExtensions
                 val tempPath = File(predefinedTempPath)
                 if (tempPath.exists())
                     for (sf2 in tempPath.listFiles { f -> f.extension == "sf2" })
-                        if (!soundFonts.any { f -> f != null && File(f).name == sf2.name })
+                        if (!soundFonts.any { f -> File(f).name == sf2.name })
                             soundFonts.add(sf2.absolutePath)
             }
         }

@@ -28,7 +28,7 @@ class FluidsynthMidiDeviceService : MidiDeviceService(), LifecycleOwner
 
         fun dispose ()
         {
-            Log.d("FluidsynthMidiService", "[MidiDeviceService] fluidsynth_receiver disposed.")
+            Log.d("FluidsynthMidiService", "[MidiDeviceService] being disposed.")
             service.fluidsynth_receiver?.dispose()
             service.fluidsynth_receiver = null
         }

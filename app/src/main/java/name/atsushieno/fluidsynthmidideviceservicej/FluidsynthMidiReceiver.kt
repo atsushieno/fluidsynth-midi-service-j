@@ -1,7 +1,6 @@
 package name.atsushieno.fluidsynthmidideviceservicej
 
 import android.content.Context
-import android.media.AudioManager
 import android.media.midi.MidiReceiver
 import fluidsynth.androidextensions.AndroidLogger
 import fluidsynth.androidextensions.AndroidNativeAssetSoundFontLoader
@@ -24,30 +23,25 @@ class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
         System.setProperty ("jna.nosys", "false") // https://github.com/java-native-access/jna/issues/384#issuecomment-441405266
         AndroidLogger.installAndroidLogger()
 
+        var am = ApplicationModel.getInstance(context)
         settings = Settings ()
-        settings.getEntry (ConfigurationKeys.SynthThreadSafeApi).setIntValue (0) // See https://github.com/atsushieno/fluidsynth-midi-service-j/issues/7
-        val manager = context.getSystemService (Context.AUDIO_SERVICE) as AudioManager
-        settings.getEntry (ConfigurationKeys.SynthGain).setDoubleValue (1.0) // See https://github.com/atsushieno/fluidsynth-midi-service-j/issues/7
+        settings.getEntry (ConfigurationKeys.SynthThreadSafeApi).setIntValue (0)
+        settings.getEntry (ConfigurationKeys.SynthGain).setDoubleValue (am.audioGainPercentage / 100.0) // See https://github.com/atsushieno/fluidsynth-midi-service-j/issues/7
         //settings.getEntry (ConfigurationKeys.AudioDriver).setStringValue ("opensles")
         //settings.getEntry (ConfigurationKeys.AudioSampleFormat).setStringValue ("float")
-        //settings.getEntry ("audio.oboe.sharing-mode").setStringValue("Exclusive")
-        //settings.getEntry ("audio.oboe.performance-mode").setStringValue("LowLatency")
-        //settings.getEntry (ConfigurationKeys.SynthSampleRate).setDoubleValue (11025.toDouble())
-        val framesPerBufferSpec = manager.getProperty (AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER)
-        val fpb = java.lang.Double.parseDouble (framesPerBufferSpec)
-        settings.getEntry (ConfigurationKeys.AudioPeriodSize).setIntValue (fpb.toInt())
-        syn = Synth (settings)
-        val sfs = MutableList<String?> (10) {null}
+        settings.getEntry ("audio.oboe.sharing-mode").setStringValue(if (am.audioExclusiveUse) "Exclusive" else "Shared")
+        settings.getEntry ("audio.oboe.performance-mode").setStringValue(am.performanceMode)
+        settings.getEntry (ConfigurationKeys.SynthSampleRate).setDoubleValue (am.sampleRate.toDouble())
+        settings.getEntry (ConfigurationKeys.AudioPeriodSize).setIntValue (am.framesPerBuffer)
 
-        SynthAndroidExtensions.getSoundFonts (sfs, context, null)
-        asset_sfloader = AndroidNativeAssetSoundFontLoader(settings, context.assets)
         // We should be able to use this alternatively, but it still has some issue that callbacks are reset in the middle, more GC pinning is likely required.
         //asset_sfloader = AndroidAssetSoundFontLoader(settings, context.assets)
+        asset_sfloader = AndroidNativeAssetSoundFontLoader(settings, context.assets)
+        syn = Synth (settings)
         syn.addSoundFontLoader (asset_sfloader)
 
-        for (sf in sfs)
-            if (sf != null)
-                syn.loadSoundFont (sf, false)
+        for (sf in ApplicationModel.getInstance(context).soundFonts)
+            syn.loadSoundFont (sf, false)
 
         adriver = AudioDriver (syn.getSettings(), syn)
         syn.systemReset()

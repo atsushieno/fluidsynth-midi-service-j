@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">FluidsynthMidiDeviceService</string>
+    <string name="midi_service_settings">MIDI Service Initialization Settings</string>
+    <string name="testing">Testing</string>
+    <string name="soundfont">Soundfont</string>
+    <string name="sampling_rate">Sampling Rate</string>
+    <string name="exclusive_audio_use">Exclusive Audio Use</string>
+    <string name="performance_mode">Performance Mode</string>
+    <string name="audio_gain_0_100">Audio Gain (0–100)</string>
+    <string name="frames_per_buffer">Frames Per Buffer</string>
+    <string name="via_platform_api">via platform API</string>
+    <string name="direct">Direct</string>
+    <string name="simple_chord">Simple Chord:</string>
+    <string name="play_midi_file">Play MIDI file:</string>
+    <string name="play">Play</string>
 </resources>
