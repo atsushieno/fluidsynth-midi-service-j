@@ -1,8 +1,6 @@
 package name.atsushieno.fluidsynthmidideviceservicej
 
-import android.arch.lifecycle.Lifecycle
-import android.arch.lifecycle.LifecycleObserver
-import android.arch.lifecycle.OnLifecycleEvent
+import android.arch.lifecycle.*
 import android.content.Context
 import android.databinding.DataBindingUtil
 import android.media.AudioManager
@@ -17,8 +15,32 @@ import android.util.Log
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 import name.atsushieno.fluidsynthmidideviceservicej.databinding.ActivityMainBinding
+import name.atsushieno.ktmidi.MidiMusic
+import name.atsushieno.ktmidi.MidiPlayer
+import name.atsushieno.ktmidi.SmfReader
 
 class MainActivity : AppCompatActivity(), LifecycleObserver {
+
+    class MainActivityViewModel : ViewModel()
+    {
+        lateinit var view: MainActivity
+        lateinit var model: ApplicationModel
+
+        fun setContext(owner: MainActivity)
+        {
+            view = owner
+            model = ApplicationModel.getInstance(owner)
+            performanceModeAdapter = ArrayAdapter(view, android.R.layout.simple_dropdown_item_1line, arrayOf("None", "LowLatency", "PowerSaving"))
+            midiMusicAdapter = ArrayAdapter (view, android.R.layout.simple_dropdown_item_1line, view.assets.list("").filter { f -> f.endsWith(".mid", true) })
+            soundFontAdapter = ArrayAdapter (view, android.R.layout.simple_dropdown_item_1line, model.soundFonts)
+        }
+
+        lateinit var performanceModeAdapter : ArrayAdapter<String>
+        lateinit var midiMusicAdapter: ArrayAdapter<String>
+        lateinit var soundFontAdapter: ArrayAdapter<String>
+
+        fun getSelectedMusic() = view.spinner_songs.selectedItem as String
+    }
 
     lateinit var midi : FluidsynthMidiReceiver
     lateinit var midi_manager : MidiManager
@@ -38,21 +60,18 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         }
     }
 
+    lateinit var vm: MainActivityViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         lifecycle.addObserver(this)
 
-        var vm = ApplicationModel.getInstance(this)
+        vm = ViewModelProviders.of(this).get(MainActivityViewModel::class.java)
+        vm.setContext(this)
         val binding : ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.vm = vm
-
-        //this.entry_frames_per_buffer.setText (ApplicationModel.getInstance(this).framesPerBuffer.toString())
-        //this.entry_sampling_rate.setText(ApplicationModel.getInstance(this).samplingRate.toString())
-        this.spinner_performance_mode.adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, arrayOf("None", "LowLatency", "PowerSaving"))
-        this.spinner_songs.adapter = ArrayAdapter (this, android.R.layout.simple_dropdown_item_1line, assets.list("*.mid"))
-        this.spinner_soundfont.adapter = ArrayAdapter (this, android.R.layout.simple_dropdown_item_1line, vm.soundFonts)
 
         this.button_direct.setOnClickListener {
             this.button_direct.isEnabled = false
@@ -79,6 +98,17 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
             }
             else
                 play_client_midi(midi_input!!)
+        }
+
+        this.button_play_smf.setOnClickListener {
+
+            if (!this::midi.isInitialized)
+                midi = FluidsynthMidiReceiver(this.applicationContext)
+            if (vm.model.isPlayingMusic()) {
+                vm.model.stopMusic()
+            } else {
+                vm.model.playMusic(vm.getSelectedMusic(), midi)
+            }
         }
     }
 

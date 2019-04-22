@@ -2,6 +2,9 @@ package name.atsushieno.fluidsynthmidideviceservicej
 
 import android.content.Context
 import android.media.AudioManager
+import android.media.midi.MidiReceiver
+import name.atsushieno.ktmidi.*
+import kotlin.experimental.and
 
 class ApplicationModel(context: Context) {
     companion object
@@ -40,4 +43,46 @@ class ApplicationModel(context: Context) {
     var framesPerBufferString
         get() = framesPerBuffer.toString()
         set(v) { framesPerBuffer = v.toInt() }
+
+    var player: MidiPlayer? = null
+
+    class Listener : OnMidiEventListener
+    {
+        override fun onEvent(e: MidiEvent) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+    }
+
+    fun playMusic(musicAsset: String, m: MidiReceiver)
+    {
+        var reader = SmfReader(context.assets.open(musicAsset))
+        reader.read()
+        var p = MidiPlayer(reader.music)
+        p.addOnEventReceivedListener(object: OnMidiEventListener {
+            override fun onEvent(e: MidiEvent) {
+                var arr = e.data!!.toByteArray()
+                when (e.statusByte.toInt() and 0xF0) {
+                    0xC0, 0xD0 -> m.send(arr, 0, 2)
+                    0xF0 -> m.send (arr, 0, e.data!!.size)
+                    else -> m.send (arr, 0, 3)
+                }
+            }
+        })
+        p.playbackCompletedToEnd = object: Runnable {
+            override fun run() {
+                player = null
+            }
+        }
+        p.play()
+        this.player = p
+    }
+
+    fun isPlayingMusic() = player != null && player!!.state == PlayerState.PLAYING
+
+    fun stopMusic()
+    {
+        if (player == null)
+            return
+        player!!.stop()
+    }
 }

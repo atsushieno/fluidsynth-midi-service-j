@@ -77,9 +77,10 @@ interface MidiInput : MidiPort, AutoCloseable
     fun setMessageReceivedListener (listener: OnMidiReceivedEventListener)
 }
 
+@kotlin.ExperimentalUnsignedTypes
 interface MidiOutput : MidiPort, AutoCloseable
 {
-    fun send (mevent: ByteArray, offset : Int, length: Int, timestamp: Long)
+    fun send (mevent: UByteArray, offset : Int, length: Int, timestamp: Long)
 }
 
 class EmptyMidiAccess : MidiAccess
@@ -140,13 +141,14 @@ class EmptyMidiInput : EmptyMidiPort(), MidiInput
     }
 }
 
+@kotlin.ExperimentalUnsignedTypes
 class EmptyMidiOutput : EmptyMidiPort(), MidiOutput
 {
     companion object {
         var instance = EmptyMidiOutput()
     }
 
-    override fun send (mevent: ByteArray, offset:Int, length:Int, timestamp:Long) {
+    override fun send (mevent: UByteArray, offset:Int, length:Int, timestamp:Long) {
         // do nothing.
     }
 

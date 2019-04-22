@@ -18,17 +18,17 @@ class MidiMachine
 
     fun processEvent (evt: MidiEvent)
     {
-        when (evt.eventType) {
+        when (evt.eventType.toInt()) {
             MidiEvent.NOTE_ON->
             channels [evt.channel.toInt()].noteVelocity [evt.msb.toInt()] = evt.lsb
 
             MidiEvent.NOTE_OFF->
-            channels [evt.channel.toInt()].noteVelocity [evt.msb.toInt()] = 0
+            channels [evt.channel.toInt()].noteVelocity [evt.msb.toInt()] = 0.toUByte()
             MidiEvent.PAF->
             channels [evt.channel.toInt()].pafVelocity [evt.msb.toInt()] = evt.lsb
             MidiEvent.CC-> {
                 // FIXME: handle RPNs and NRPNs by DTE
-                when (evt.msb) {
+                when (evt.msb.toInt()) {
                     MidiCC.NRPN_MSB,
                     MidiCC.NRPN_LSB ->
                         channels[evt.channel.toInt()].dteTarget = DteTarget.NRPN
@@ -52,31 +52,32 @@ class MidiMachine
             MidiEvent.CAF->
             channels [evt.channel.toInt()].caf = evt.msb
             MidiEvent.PITCH ->
-            channels [evt.channel.toInt()].pitchbend = ((evt.msb.toInt() shl 7) + evt.lsb).toShort()
+            channels [evt.channel.toInt()].pitchbend = ((evt.msb.toInt() shl 7) + evt.lsb.toShort()).toShort()
         }
         for (receiver in event_received_handlers)
             receiver.onEvent (evt)
     }
 }
 
+@kotlin.ExperimentalUnsignedTypes
 class MidiMachineChannel
 {
-    val noteVelocity = ByteArray(128)
-    val pafVelocity = ByteArray(128)
-    val controls = ByteArray(128)
+    val noteVelocity = UByteArray(128)
+    val pafVelocity = UByteArray(128)
+    val controls = UByteArray(128)
     val rpns = ShortArray(128) // only 5 should be used though
     val nrpns = ShortArray(128)
-    var program : Byte = 0
-    var caf : Byte = 0
+    var program : UByte = 0.toUByte()
+    var caf : UByte = 0.toUByte()
     var pitchbend : Short = 8192
     var dteTarget : DteTarget = DteTarget.RPN
-    private var dte_target_value : Byte = 0
+    private var dte_target_value : UByte = 0.toUByte()
 
     val rpnTarget : Short
-        get () = ((controls [MidiCC.RPN_MSB.toInt()].toInt() shl 7) + controls [MidiCC.RPN_LSB.toInt()]).toShort()
+        get () = ((controls [MidiCC.RPN_MSB.toInt()].toInt() shl 7) + controls [MidiCC.RPN_LSB.toInt()].toShort()).toShort()
 
 
-    fun processDte (value: Byte, isMsb: Boolean)
+    fun processDte (value: UByte, isMsb: Boolean)
     {
         var arr : ShortArray
         when (dteTarget) {

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <variable name="vm" type="name.atsushieno.fluidsynthmidideviceservicej.ApplicationModel" />
+        <variable name="vm" type="name.atsushieno.fluidsynthmidideviceservicej.MainActivity.MainActivityViewModel" />
     </data>
 
     <android.support.constraint.ConstraintLayout
@@ -61,7 +61,8 @@
                 <Spinner
                     android:id="@+id/spinner_soundfont"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    app:adapter="@{vm.soundFontAdapter}" />
             </TableRow>
 
             <TableRow
@@ -84,7 +85,7 @@
                     android:selectAllOnFocus="true"
                     android:singleLine="true"
                     android:textAlignment="viewEnd"
-                    android:text="@={vm.sampleRateString}"
+                    android:text="@={vm.model.sampleRateString}"
                     tools:text="44100"
                     android:importantForAutofill="no" />
 
@@ -105,7 +106,7 @@
                     android:id="@+id/switch_exclusive_audio_use"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="@={vm.audioExclusiveUse}"/>
+                    android:checked="@={vm.model.audioExclusiveUse}"/>
             </TableRow>
 
             <TableRow
@@ -123,7 +124,8 @@
                     android:id="@+id/spinner_performance_mode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:spinnerMode="dropdown" />
+                    android:spinnerMode="dropdown"
+                    app:adapter="@{vm.performanceModeAdapter}" />
 
             </TableRow>
 
@@ -143,7 +145,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:max="100"
-                    android:progress="@={vm.audioGainPercentage}" />
+                    android:progress="@={vm.model.audioGainPercentage}" />
 
             </TableRow>
             <TableRow
@@ -162,7 +164,7 @@
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:inputType="number"
-                    android:text="@={vm.framesPerBufferString}"
+                    android:text="@={vm.model.framesPerBufferString}"
                     android:textAlignment="viewEnd" />
             </TableRow>
 
@@ -217,7 +219,8 @@
                 <Spinner
                     android:id="@+id/spinner_songs"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    app:adapter="@{vm.midiMusicAdapter}" />
 
                 <Button
                     android:id="@+id/button_play_smf"
