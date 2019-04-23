@@ -65,7 +65,7 @@ internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: Mid
     fun mute ()
     {
         for (i in 0..15)
-            onEvent (MidiEvent ((i + 0xB0).toByte(), 0x78, 0, null))
+            onEvent (MidiEvent (i + 0xB0, 0x78, 0, null))
     }
 
     fun pause ()

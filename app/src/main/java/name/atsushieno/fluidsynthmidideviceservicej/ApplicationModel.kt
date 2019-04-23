@@ -53,6 +53,8 @@ class ApplicationModel(context: Context) {
         }
     }
 
+    val tmp_arr = ByteArray(3)
+
     fun playMusic(musicAsset: String, m: MidiReceiver)
     {
         var reader = SmfReader(context.assets.open(musicAsset))
@@ -60,10 +62,14 @@ class ApplicationModel(context: Context) {
         var p = MidiPlayer(reader.music)
         p.addOnEventReceivedListener(object: OnMidiEventListener {
             override fun onEvent(e: MidiEvent) {
-                when (e.statusByte.toInt() and 0xF0) {
-                    0xC0, 0xD0 -> m.send(e.data, 0, 2)
-                    0xF0 -> m.send (e.data, 0, e.data!!.size)
-                    else -> m.send (e.data, 0, 3)
+                if (e.data != null)
+                    m.send (e.data, 0, e.data!!.size)
+                else {
+                    var size = MidiEvent.fixedDataSize(e.statusByte)
+                    tmp_arr[0] = e.statusByte
+                    tmp_arr[1] = e.msb
+                    tmp_arr[2] = e.lsb
+                    m.send(tmp_arr, 0, size.toInt(), 0)
                 }
             }
         })

@@ -279,13 +279,13 @@ class MidiEvent
             while (i < end) {
                 if (bytes[i].toUnsigned() == 0xF0) {
                     val tmp = bytes.copyOfRange(i, size)
-                    yield (MidiEvent (0xF0.toByte(), 0, 0, tmp.toByteArray()))
+                    yield (MidiEvent (0xF0, 0, 0, tmp.toByteArray()))
                     i += size
                 } else {
                     if (end < i + MidiEvent.fixedDataSize(bytes[i]))
                         throw Exception (String.format("Received data was incomplete to build MIDI status message for '%x' status.", bytes[i]))
                     val z = MidiEvent.fixedDataSize(bytes[i])
-                    yield (MidiEvent (bytes[i], bytes [i+1], (if (z > 1) bytes [i+2] else 0), null))
+                    yield (MidiEvent (bytes[i].toInt(), bytes [i+1].toInt(), (if (z > 1) bytes [i+2].toInt() else 0), null))
                     i += z + 1
                 }
             }
@@ -305,9 +305,9 @@ class MidiEvent
         this.data = null
     }
 
-    constructor (type : Byte, arg1 : Byte, arg2 : Byte, data : ByteArray?)
+    constructor (type : Int, arg1 : Int, arg2 : Int, data : ByteArray?)
     {
-        this.value = type.toUnsigned() + (arg1.toUnsigned() shl 8) + (arg2.toUnsigned() shl 16)
+        this.value = type + (arg1 shl 8) + (arg2 shl 16)
         this.data = data
     }
 
@@ -316,9 +316,11 @@ class MidiEvent
     // This expects EndSysEx byte _inclusive_ for F0 message.
     val data : ByteArray?
 
-    val statusByte : Byte = (value and 0xFF).toByte()
+    val statusByte : Byte
+        get() = (value and 0xFF).toByte()
 
-    val eventType : Byte =
+    val eventType : Byte
+        get() =
             when (statusByte) {
                 META,
                 SYSEX,
@@ -326,14 +328,18 @@ class MidiEvent
                 else ->(value and 0xF0).toByte()
             }
 
-    val msb : Byte = ((value and 0xFF00) shr 8).toByte()
+    val msb : Byte
+        get() = ((value and 0xFF00) shr 8).toByte()
 
 
-    val lsb : Byte = ((value and 0xFF0000) shr 16).toByte()
+    val lsb : Byte
+        get() = ((value and 0xFF0000) shr 16).toByte()
 
-    val metaType : Byte = msb
+    val metaType : Byte
+        get() = msb
 
-    val channel : Byte = (value and 0x0F).toByte()
+    val channel : Byte
+        get() = (value and 0x0F).toByte()
 
     override fun toString () : String
     {
@@ -613,7 +619,7 @@ class SmfReader(private var stream: InputStream) {
                 val args = ByteArray(len)
                 if (len > 0)
                     readBytes(args)
-                return MidiMessage (deltaTime, MidiEvent (running_status, metaType, 0, args))
+                return MidiMessage (deltaTime, MidiEvent (running_status.toInt(), metaType.toInt(), 0, args))
             }
             else -> {
                 var value = running_status.toUnsigned()
