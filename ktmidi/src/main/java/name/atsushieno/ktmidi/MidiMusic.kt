@@ -5,12 +5,7 @@ package name.atsushieno.ktmidi
 import java.io.InputStream
 import java.io.OutputStream
 
-@kotlin.ExperimentalUnsignedTypes
-internal fun OutputStream.write(data: UByteArray, i: Int, size: Int) = write (data.toByteArray(), i, size)
-@kotlin.ExperimentalUnsignedTypes
-internal fun OutputStream.writeByte(b: UByte) = this.writeByte(b.toByte())
-@kotlin.ExperimentalUnsignedTypes
-internal fun Char.toUByte(): UByte = this.toByte().toUByte()
+internal fun Byte.toUnsigned() = if (this < 0) 256 + this else this.toInt()
 
 internal fun OutputStream.writeByte(b : Byte)
 {
@@ -18,7 +13,6 @@ internal fun OutputStream.writeByte(b : Byte)
     this.write(arr, 0, 1)
 }
 
-@kotlin.ExperimentalUnsignedTypes
 class MidiMusic {
     companion object {
         fun read (stream : InputStream) : MidiMusic {
@@ -27,11 +21,11 @@ class MidiMusic {
             return r.music
         }
 
-        fun getMetaEventsOfType (messages : Iterable<MidiMessage>, metaType : UByte) = sequence {
+        fun getMetaEventsOfType (messages : Iterable<MidiMessage>, metaType : Byte) = sequence {
             var v = 0
             for (m in messages) {
                 v += m.deltaTime
-                if (m.event.eventType.toInt() == MidiEvent.META && m.event.msb == metaType)
+                if (m.event.eventType == MidiEvent.META && m.event.msb == metaType)
                     yield(MidiMessage(v, m.event))
             }
         }
@@ -55,7 +49,7 @@ class MidiMusic {
                     if (deltaTime != m.deltaTime)
                         break
                     t += m.deltaTime
-                    if (m.event.eventType.toInt() == MidiEvent.META && m.event.msb.toInt() == MidiMetaType.TEMPO)
+                    if (m.event.eventType == MidiEvent.META && m.event.msb == MidiMetaType.TEMPO)
                         tempo = MidiMetaType.getTempo (m.event.data!!)
                 }
                 return v
@@ -73,7 +67,7 @@ class MidiMusic {
         this.tracks.add (track)
     }
 
-    fun getMetaEventsOfType (metaType : UByte) : Iterable<MidiMessage> {
+    fun getMetaEventsOfType (metaType : Byte) : Iterable<MidiMessage> {
         if (format != 0.toByte())
             return SmfTrackMerger.merge (this).getMetaEventsOfType (metaType)
         return getMetaEventsOfType (tracks [0].messages, metaType).asIterable()
@@ -89,13 +83,13 @@ class MidiMusic {
     {
         if (format != 0.toByte())
             return SmfTrackMerger.merge (this).getTotalPlayTimeMilliseconds ()
-        return getTotalPlayTimeMilliseconds (tracks [0].messages, deltaTimeSpec.toInt())
+        return getTotalPlayTimeMilliseconds (tracks [0].messages, deltaTimeSpec.toUnsigned())
     }
 
     fun getTimePositionInMillisecondsForTick (ticks : Int) : Int {
         if (format != 0.toByte())
             return SmfTrackMerger.merge (this).getTimePositionInMillisecondsForTick (ticks)
-        return getPlayTimeMillisecondsAtTick (tracks [0].messages, ticks, deltaTimeSpec.toInt())
+        return getPlayTimeMillisecondsAtTick (tracks [0].messages, ticks, deltaTimeSpec.toUnsigned())
     }
 
     init {
@@ -128,181 +122,178 @@ class MidiMessage(val deltaTime: Int, evt: MidiEvent) {
     val event : MidiEvent = evt
 }
 
-@kotlin.ExperimentalUnsignedTypes
 class MidiCC
 {
     companion object {
 
-        const val BANK_SELECT = 0x00
-        const val MODULATION = 0x01
-        const val BREATH = 0x02
-        const val FOOT = 0x04
-        const val PORTAMENTO_TIME = 0x05
-        const val DTE_MSB = 0x06
-        const val VOLUME = 0x07
-        const val BALANCE = 0x08
-        const val PAN = 0x0A
-        const val EXPRESSION = 0x0B
-        const val EFFECT_CONTROL_1 = 0x0C
-        const val EFFECT_CONTROL_2 = 0x0D
-        const val GENERAL_1 = 0x10
-        const val GENERAL_2 = 0x11
-        const val GENERAL_3 = 0x12
-        const val GENERAL_4 = 0x13
-        const val BANK_SELECT_LSB = 0x20
-        const val MODULATION_LSB = 0x21
-        const val BREATH_LSB = 0x22
-        const val FOOT_LSB = 0x24
-        const val PORTAMENTO_TIME_LSB = 0x25
-        const val DTE_LSB = 0x26
-        const val VOLUME_LSB = 0x27
-        const val BALANCE_LSB = 0x28
-        const val PAN_LSB = 0x2A
-        const val EXPRESSION_LSB = 0x2B
-        const val EFFECT_1_LSB = 0x2C
-        const val EFFECT_2_LSB = 0x2D
-        const val GENERAL_1_LSB = 0x30
-        const val GENERAL_2_LSB = 0x31
-        const val GENERAL_3_LSB = 0x32
-        const val GENERAL_4_LSB = 0x33
-        const val HOLD = 0x40
-        const val PORTAMENTO_SWITCH = 0x41
-        const val SOSTENUTO = 0x42
-        const val SOFT_PEDAL = 0x43
-        const val LEGATO= 0x44
-        const val HOLD_2= 0x45
-        const val SOUND_CONTROLLER_1 = 0x46
-        const val SOUND_CONTROLLER_2 = 0x47
-        const val SOUND_CONTROLLER_3 = 0x48
-        const val SOUND_CONTROLLER_4 = 0x49
-        const val SOUND_CONTROLLER_5 = 0x4A
-        const val SOUND_CONTROLLER_6 = 0x4B
-        const val SOUND_CONTROLLER_7 = 0x4C
-        const val SOUND_CONTROLLER_8 = 0x4D
-        const val SOUND_CONTROLLER_9 = 0x4E
-        const val SOUND_CONTROLLER_10 = 0x4F
-        const val GENERAL_5= 0x50
-        const val GENERAL_6 = 0x51
-        const val GENERAL_7 = 0x52
-        const val GENERAL_8 = 0x53
-        const val PORTAMENTO_CONTROL = 0x54
-        const val RSD = 0x5B
-        const val EFFECT_1 = 0x5B
-        const val TREMOLO = 0x5C
-        const val EFFECT_2 = 0x5C
-        const val CSD = 0x5D
-        const val EFFECT_3 = 0x5D
-        const val CELESTE = 0x5E
-        const val EFFECT_4 = 0x5E
-        const val PHASER = 0x5F
-        const val EFFECT_5 = 0x5F
-        const val DTE_INCREMENT = 0x60
-        const val DTE_DECREMENT = 0x61
-        const val NRPN_LSB = 0x62
-        const val NRPN_MSB = 0x63
-        const val RPN_LSB = 0x64
-        const val RPN_MSB = 0x65
+        const val BANK_SELECT = 0x00.toByte()
+        const val MODULATION = 0x01.toByte()
+        const val BREATH = 0x02.toByte()
+        const val FOOT = 0x04.toByte()
+        const val PORTAMENTO_TIME = 0x05.toByte()
+        const val DTE_MSB = 0x06.toByte()
+        const val VOLUME = 0x07.toByte()
+        const val BALANCE = 0x08.toByte()
+        const val PAN = 0x0A.toByte()
+        const val EXPRESSION = 0x0B.toByte()
+        const val EFFECT_CONTROL_1 = 0x0C.toByte()
+        const val EFFECT_CONTROL_2 = 0x0D.toByte()
+        const val GENERAL_1 = 0x10.toByte()
+        const val GENERAL_2 = 0x11.toByte()
+        const val GENERAL_3 = 0x12.toByte()
+        const val GENERAL_4 = 0x13.toByte()
+        const val BANK_SELECT_LSB = 0x20.toByte()
+        const val MODULATION_LSB = 0x21.toByte()
+        const val BREATH_LSB = 0x22.toByte()
+        const val FOOT_LSB = 0x24.toByte()
+        const val PORTAMENTO_TIME_LSB = 0x25.toByte()
+        const val DTE_LSB = 0x26.toByte()
+        const val VOLUME_LSB = 0x27.toByte()
+        const val BALANCE_LSB = 0x28.toByte()
+        const val PAN_LSB = 0x2A.toByte()
+        const val EXPRESSION_LSB = 0x2B.toByte()
+        const val EFFECT_1_LSB = 0x2C.toByte()
+        const val EFFECT_2_LSB = 0x2D.toByte()
+        const val GENERAL_1_LSB = 0x30.toByte()
+        const val GENERAL_2_LSB = 0x31.toByte()
+        const val GENERAL_3_LSB = 0x32.toByte()
+        const val GENERAL_4_LSB = 0x33.toByte()
+        const val HOLD = 0x40.toByte()
+        const val PORTAMENTO_SWITCH = 0x41.toByte()
+        const val SOSTENUTO = 0x42.toByte()
+        const val SOFT_PEDAL = 0x43.toByte()
+        const val LEGATO= 0x44.toByte()
+        const val HOLD_2= 0x45.toByte()
+        const val SOUND_CONTROLLER_1 = 0x46.toByte()
+        const val SOUND_CONTROLLER_2 = 0x47.toByte()
+        const val SOUND_CONTROLLER_3 = 0x48.toByte()
+        const val SOUND_CONTROLLER_4 = 0x49.toByte()
+        const val SOUND_CONTROLLER_5 = 0x4A.toByte()
+        const val SOUND_CONTROLLER_6 = 0x4B.toByte()
+        const val SOUND_CONTROLLER_7 = 0x4C.toByte()
+        const val SOUND_CONTROLLER_8 = 0x4D.toByte()
+        const val SOUND_CONTROLLER_9 = 0x4E.toByte()
+        const val SOUND_CONTROLLER_10 = 0x4F.toByte()
+        const val GENERAL_5= 0x50.toByte()
+        const val GENERAL_6 = 0x51.toByte()
+        const val GENERAL_7 = 0x52.toByte()
+        const val GENERAL_8 = 0x53.toByte()
+        const val PORTAMENTO_CONTROL = 0x54.toByte()
+        const val RSD = 0x5B.toByte()
+        const val EFFECT_1 = 0x5B.toByte()
+        const val TREMOLO = 0x5C.toByte()
+        const val EFFECT_2 = 0x5C.toByte()
+        const val CSD = 0x5D.toByte()
+        const val EFFECT_3 = 0x5D.toByte()
+        const val CELESTE = 0x5E.toByte()
+        const val EFFECT_4 = 0x5E.toByte()
+        const val PHASER = 0x5F.toByte()
+        const val EFFECT_5 = 0x5F.toByte()
+        const val DTE_INCREMENT = 0x60.toByte()
+        const val DTE_DECREMENT = 0x61.toByte()
+        const val NRPN_LSB = 0x62.toByte()
+        const val NRPN_MSB = 0x63.toByte()
+        const val RPN_LSB = 0x64.toByte()
+        const val RPN_MSB = 0x65.toByte()
         // Channel mode messages
-        const val ALL_SOUND_OFF = 0x78
-        const val RESET_ALL_CONTROLLERS = 0x79
-        const val LOCAL_CONTROL = 0x7A
-        const val ALL_NOTES_OFF = 0x7B
-        const val OMNI_MODE_OFF = 0x7C
-        const val OMNI_MODE_ON = 0x7D
-        const val POLY_MODE_OFF = 0x7E
-        const val POLY_MODE_ON = 0x7F
+        const val ALL_SOUND_OFF = 0x78.toByte()
+        const val RESET_ALL_CONTROLLERS = 0x79.toByte()
+        const val LOCAL_CONTROL = 0x7A.toByte()
+        const val ALL_NOTES_OFF = 0x7B.toByte()
+        const val OMNI_MODE_OFF = 0x7C.toByte()
+        const val OMNI_MODE_ON = 0x7D.toByte()
+        const val POLY_MODE_OFF = 0x7E.toByte()
+        const val POLY_MODE_ON = 0x7F.toByte()
     }
 }
 
-@kotlin.ExperimentalUnsignedTypes
 class MidiRpnType
 {
     companion object {
 
-        const val PITCH_BEND_SENSITIVITY = 0
-        const val FINE_TUNING = 1
-        const val COARSE_TUNING = 2
-        const val TUNING_PROGRAM = 3
-        const val TUNING_BANK_SELECT = 4
-        const val MODULATION_DEPTH = 5
+        const val PITCH_BEND_SENSITIVITY = 0.toByte()
+        const val FINE_TUNING = 1.toByte()
+        const val COARSE_TUNING = 2.toByte()
+        const val TUNING_PROGRAM = 3.toByte()
+        const val TUNING_BANK_SELECT = 4.toByte()
+        const val MODULATION_DEPTH = 5.toByte()
     }
 }
 
-@kotlin.ExperimentalUnsignedTypes
 class MidiMetaType
 {
     companion object {
 
-        const val SEQUENCE_NUMBER = 0x00
-        const val TEXT = 0x01
-        const val COPYRIGHT = 0x02
-        const val TRACK_NAME= 0x03
-        const val INSTRUMENT_NAME = 0x04
-        const val LYRIC = 0x05
-        const val MARKER = 0x06
-        const val CUE = 0x07
-        const val CHANNEL_PREFIX= 0x20
-        const val END_OF_TRACK = 0x2F
-        const val TEMPO = 0x51
-        const val SMTPE_OFFSET = 0x54
-        const val TIME_SIGNATURE = 0x58
-        const val KEY_SIGNATURE = 0x59
-        const val SEQUENCER_SPECIFIC = 0x7F
+        const val SEQUENCE_NUMBER = 0x00.toByte()
+        const val TEXT = 0x01.toByte()
+        const val COPYRIGHT = 0x02.toByte()
+        const val TRACK_NAME= 0x03.toByte()
+        const val INSTRUMENT_NAME = 0x04.toByte()
+        const val LYRIC = 0x05.toByte()
+        const val MARKER = 0x06.toByte()
+        const val CUE = 0x07.toByte()
+        const val CHANNEL_PREFIX= 0x20.toByte()
+        const val END_OF_TRACK = 0x2F.toByte()
+        const val TEMPO = 0x51.toByte()
+        const val SMTPE_OFFSET = 0x54.toByte()
+        const val TIME_SIGNATURE = 0x58.toByte()
+        const val KEY_SIGNATURE = 0x59.toByte()
+        const val SEQUENCER_SPECIFIC = 0x7F.toByte()
 
         const val DEFAULT_TEMPO = 500000
 
-        fun getTempo (data : UByteArray) : Int
+        fun getTempo (data : ByteArray) : Int
         {
-            return (data[0].toInt() shl 16) + (data [1].toInt() shl 8) + data [2].toInt()
+            var d1 = data [1].toUnsigned()
+            var d1x = d1 shl 8
+            return (data[0].toUnsigned() shl 16) + (data [1].toUnsigned() shl 8) + data [2]
         }
 
-        fun getBpm (data : UByteArray) : Double
+        fun getBpm (data : ByteArray) : Double
         {
             return 60000000.0 / getTempo(data)
         }
     }
 }
 
-@kotlin.ExperimentalUnsignedTypes
 class MidiEvent
 {
     companion object {
 
-        const val NOTE_OFF = 0x80
-        const val NOTE_ON = 0x90
-        const val PAF = 0xA0
-        const val CC = 0xB0
-        const val PROGRAM = 0xC0
-        const val CAF = 0xD0
-        const val PITCH = 0xE0
-        const val SYSEX = 0xF0
-        const val SYSEX_2 = 0xF7
-        const val META = 0xFF
+        const val NOTE_OFF : Byte = 0x80.toByte()
+        const val NOTE_ON : Byte = 0x90.toByte()
+        const val PAF : Byte = 0xA0.toByte()
+        const val CC : Byte = 0xB0.toByte()
+        const val PROGRAM : Byte = 0xC0.toByte()
+        const val CAF : Byte = 0xD0.toByte()
+        const val PITCH : Byte = 0xE0.toByte()
+        const val SYSEX : Byte = 0xF0.toByte()
+        const val SYSEX_2 : Byte = 0xF7.toByte()
+        const val META : Byte = 0xFF.toByte()
 
         const val EndSysEx = 0xF7
 
         fun convert (bytes : Array<Byte>, index : Int, size : Int) = sequence {
             var i = index
             val end = index +size
-            var uarr = bytes.toByteArray().toUByteArray()
             while (i < end) {
-                if (bytes[i].toInt() == 0xF0) {
+                if (bytes[i].toUnsigned() == 0xF0) {
                     val tmp = bytes.copyOfRange(i, size)
-                    yield (MidiEvent (0xF0.toUByte(), 0.toUByte(), 0.toUByte(), tmp.toByteArray().toUByteArray()))
+                    yield (MidiEvent (0xF0.toByte(), 0, 0, tmp.toByteArray()))
                     i += size
                 } else {
-                    if (end < i + MidiEvent.fixedDataSize(uarr[i]))
+                    if (end < i + MidiEvent.fixedDataSize(bytes[i]))
                         throw Exception (String.format("Received data was incomplete to build MIDI status message for '%x' status.", bytes[i]))
-                    val z = MidiEvent.fixedDataSize(uarr[i])
-                    yield (MidiEvent (uarr[i], uarr [i+1], if (z > 1) uarr [i+2] else 0.toUByte(), null))
+                    val z = MidiEvent.fixedDataSize(bytes[i])
+                    yield (MidiEvent (bytes[i], bytes [i+1], (if (z > 1) bytes [i+2] else 0), null))
                     i += z + 1
                 }
             }
         }
 
-        fun fixedDataSize (statusByte : UByte) : Int =
-                when ((statusByte.toInt() and 0xF0)) {
-                    0xF0 -> 0 // including 0xF7, 0xFF
+        fun fixedDataSize (statusByte : Byte) : Byte =
+                when ((statusByte.toUnsigned() and 0xF0).toByte()) {
+                    0xF0.toByte() -> 0 // including 0xF7, 0xFF
                     PROGRAM, CAF -> 1
                     else -> 2
                 }
@@ -314,35 +305,35 @@ class MidiEvent
         this.data = null
     }
 
-    constructor (type : UByte, arg1 : UByte, arg2 : UByte, data : UByteArray?)
+    constructor (type : Byte, arg1 : Byte, arg2 : Byte, data : ByteArray?)
     {
-        this.value = type.toInt() + (arg1.toInt() shl 8) + (arg2.toInt() shl 16)
+        this.value = type.toUnsigned() + (arg1.toUnsigned() shl 8) + (arg2.toUnsigned() shl 16)
         this.data = data
     }
 
     var value : Int = 0
 
     // This expects EndSysEx byte _inclusive_ for F0 message.
-    val data : UByteArray?
+    val data : ByteArray?
 
-    val statusByte : UByte = (value and 0xFF).toUByte()
+    val statusByte : Byte = (value and 0xFF).toByte()
 
-    val eventType : UByte =
-            when (statusByte.toInt()) {
+    val eventType : Byte =
+            when (statusByte) {
                 META,
                 SYSEX,
                 SYSEX_2 -> this.statusByte
-                else ->(value and 0xF0).toUByte()
+                else ->(value and 0xF0).toByte()
             }
 
-    val msb : UByte = ((value and 0xFF00) shr 8).toUByte()
+    val msb : Byte = ((value and 0xFF00) shr 8).toByte()
 
 
-    val lsb : UByte = ((value and 0xFF0000) shr 16).toUByte()
+    val lsb : Byte = ((value and 0xFF0000) shr 16).toByte()
 
-    val metaType : UByte = msb
+    val metaType : Byte = msb
 
-    val channel : UByte = (value and 0x0F).toUByte()
+    val channel : Byte = (value and 0x0F).toByte()
 
     override fun toString () : String
     {
@@ -393,11 +384,11 @@ class SmfWriter// default meta event writer.
         stream.write (byteArrayOf('M'.toByte(), 'T'.toByte(), 'r'.toByte(), 'k'.toByte()), 0, 4)
         writeInt (getTrackDataSize (track))
 
-        var running_status : UByte = 0.toUByte()
+        var running_status : Byte = 0
 
         for (e in track.messages) {
             write7BitVariableInteger (e.deltaTime)
-            when (e.event.eventType.toInt()) {
+            when (e.event.eventType) {
                 MidiEvent.META -> metaEventWriter(false, e, stream)
                 MidiEvent.SYSEX, MidiEvent.SYSEX_2 -> {
                     stream.writeByte(e.event.eventType)
@@ -439,13 +430,13 @@ class SmfWriter// default meta event writer.
     private fun getTrackDataSize (track : MidiTrack ) : Int
     {
         var size = 0
-        var runningStatus : UByte = 0.toUByte()
+        var runningStatus : Byte = 0
         for (e in track.messages) {
             // delta time
             size += getVariantLength (e.deltaTime)
 
             // arguments
-            when (e.event.eventType.toInt()) {
+            when (e.event.eventType) {
                 MidiEvent.META -> size += metaEventWriter (true, e, null)
                 MidiEvent.SYSEX, MidiEvent.SYSEX_2 -> {
                     size++
@@ -572,10 +563,10 @@ class SmfReader(private var stream: InputStream) {
     private val data = music
 
     fun read () {
-        if (readByte() != 'M'.toUByte()
-                || readByte() != 'T'.toUByte()
-                || readByte() != 'h'.toUByte()
-                || readByte() != 'd'.toUByte())
+        if (readByte() != 'M'.toByte()
+                || readByte() != 'T'.toByte()
+                || readByte() != 'h'.toByte()
+                || readByte() != 'd'.toByte())
             throw parseError("MThd is expected")
         if (readInt32() != 6)
             throw parseError("Unexpected data size (should be 6)")
@@ -589,10 +580,10 @@ class SmfReader(private var stream: InputStream) {
     private fun readTrack () : MidiTrack {
         val tr = MidiTrack()
         if (
-                readByte() != 'M'.toUByte()
-                || readByte() != 'T'.toUByte()
-                || readByte() != 'r'.toUByte()
-                || readByte() != 'k'.toUByte())
+                readByte() != 'M'.toByte()
+                || readByte() != 'T'.toByte()
+                || readByte() != 'r'.toByte()
+                || readByte() != 'k'.toByte())
             throw parseError("MTrk is expected")
         val trackSize = readInt32()
         current_track_size = 0
@@ -608,27 +599,27 @@ class SmfReader(private var stream: InputStream) {
     }
 
     private var current_track_size : Int = 0
-    private var running_status : UByte = 0.toUByte()
+    private var running_status : Byte = 0
 
     private fun readMessage (deltaTime : Int) : MidiMessage
     {
-        val b = peekByte ()
-        running_status = if (b < 0x80.toUByte()) running_status else readByte ().toUByte()
+        val b = peekByte ().toUnsigned()
+        running_status = if (b < 0x80) running_status else readByte ()
         val len: Int
-        when (running_status.toInt()) {
+        when (running_status) {
             MidiEvent.SYSEX, MidiEvent.SYSEX_2, MidiEvent.META -> {
-                val metaType = if (running_status.toInt() == MidiEvent.META) readByte () else 0.toUByte()
+                val metaType = if (running_status == MidiEvent.META) readByte () else 0
                 len = readVariableLength()
                 val args = ByteArray(len)
                 if (len > 0)
                     readBytes(args)
-                return MidiMessage (deltaTime, MidiEvent (running_status, metaType, 0.toUByte(), args.toUByteArray()))
+                return MidiMessage (deltaTime, MidiEvent (running_status, metaType, 0, args))
             }
             else -> {
-                var value = running_status.toInt()
-                value += readByte().toInt() shl 8
-                if (MidiEvent.fixedDataSize(running_status) == 2)
-                    value += readByte().toInt() shl 16
+                var value = running_status.toUnsigned()
+                value += readByte().toUnsigned() shl 8
+                if (MidiEvent.fixedDataSize(running_status) == 2.toByte())
+                    value += readByte().toUnsigned() shl 16
                 return MidiMessage (deltaTime, MidiEvent (value))
             }
         }
@@ -657,9 +648,9 @@ class SmfReader(private var stream: InputStream) {
         var v = 0
         var i = 0
         while (i < 4) {
-            val b = readByte ()
-            v = (v shl 7) + b.toInt()
-            if (b < 0x80.toUByte())
+            val b = readByte ().toUnsigned()
+            v = (v shl 7) + b
+            if (b < 0x80)
                 return v
             v -= 0x80
             i++
@@ -670,29 +661,29 @@ class SmfReader(private var stream: InputStream) {
     private var peek_byte : Int = -1
     private var stream_position : Int = 0
 
-    private fun peekByte () : UByte
+    private fun peekByte () : Byte
     {
         if (peek_byte < 0)
             peek_byte = stream.read()
         if (peek_byte < 0)
             throw parseError ("Insufficient stream. Failed to read a byte.")
-        return peek_byte.toUByte()
+        return peek_byte.toByte()
     }
 
-    private fun readByte () : UByte
+    private fun readByte () : Byte
     {
         try {
 
             current_track_size++
             if (peek_byte >= 0) {
-                val b = peek_byte.toUByte()
+                val b = peek_byte.toByte()
                 peek_byte = -1
                 return b
             }
             val ret = stream.read()
             if (ret < 0)
                 throw parseError ("Insufficient stream. Failed to read a byte.")
-            return ret.toUByte()
+            return ret.toByte()
 
         } finally {
             stream_position++
@@ -701,12 +692,12 @@ class SmfReader(private var stream: InputStream) {
 
     private fun readInt16 () : Short
     {
-        return ((readByte ().toInt() shl 8) + readByte ().toShort()).toShort()
+        return ((readByte ().toUnsigned() shl 8) + readByte ().toUnsigned()).toShort()
     }
 
     private fun readInt32 () : Int
     {
-        return (((readByte ().toInt() shl 8) + readByte ().toInt() shl 8) + readByte ().toInt() shl 8) + readByte ().toShort()
+        return (((readByte ().toUnsigned() shl 8) + readByte ().toUnsigned() shl 8) + readByte ().toUnsigned() shl 8) + readByte ().toUnsigned()
     }
 
     private fun parseError (msg : String) : Exception
@@ -865,9 +856,9 @@ class SmfTrackSplitter(var source: MutableList<MidiMessage>, deltaTimeSpec: Byte
     // to ease data reading.
     private fun getTrackID (e : MidiMessage) : Int
     {
-        return when (e.event.eventType.toInt()) {
+        return when (e.event.eventType) {
             MidiEvent.META, MidiEvent.SYSEX, MidiEvent.SYSEX_2 -> -1
-            else -> e.event.channel.toInt()
+            else -> e.event.channel.toUnsigned()
         }
     }
 

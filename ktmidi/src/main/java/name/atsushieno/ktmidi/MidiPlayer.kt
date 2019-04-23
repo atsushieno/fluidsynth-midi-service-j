@@ -10,7 +10,6 @@ enum class PlayerState {
     PAUSED,
 }
 
-@kotlin.ExperimentalUnsignedTypes
 internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: MidiPlayerTimeManager, deltaTimeSpec: Int) : AutoCloseable
 {
     var starting : Runnable? = null
@@ -30,7 +29,7 @@ internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: Mid
     var state : PlayerState
     private var event_idx = 0
     var currentTempo = MidiMetaType.DEFAULT_TEMPO
-    var currentTimeSignature = UByteArray(4)
+    var currentTimeSignature = ByteArray(4)
     var playDeltaTime: Int = 0
     private val event_received_handlers = arrayListOf<OnMidiEventListener>()
 
@@ -59,16 +58,14 @@ internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: Mid
 
     fun play ()
     {
-        if (state == PlayerState.PLAYING)
-            return
-        state = PlayerState.PLAYING
         pause_lock.withLock { pause_handle.signal() }
+        state = PlayerState.PLAYING
     }
 
     fun mute ()
     {
-        for (i in 0 until 16)
-            onEvent (MidiEvent ((i + 0xB0).toUByte(), 0x78.toUByte(), 0.toUByte(), null))
+        for (i in 0..15)
+            onEvent (MidiEvent ((i + 0xB0).toByte(), 0x78, 0, null))
     }
 
     fun pause ()
@@ -77,7 +74,6 @@ internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: Mid
         mute ()
     }
 
-
     fun playerLoop ()
     {
         starting?.run ()
@@ -85,10 +81,9 @@ internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: Mid
         event_idx = 0
         playDeltaTime = 0
         var doWait = true
-
         while (true) {
             if (doWait) {
-                pause_lock.withLock { pause_handle.await () }
+                pause_lock.withLock { pause_handle.await() }
                 doWait = false
             }
             if (do_stop)
@@ -137,10 +132,10 @@ internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: Mid
             playDeltaTime += m.deltaTime
         }
 
-        if (m.event.statusByte == 0xFF.toUByte()) {
-            if (m.event.msb.toInt() == MidiMetaType.TEMPO)
+        if (m.event.statusByte == 0xFF.toByte()) {
+            if (m.event.msb == MidiMetaType.TEMPO)
                 currentTempo = MidiMetaType.getTempo (m.event.data!!)
-            else if (m.event.msb.toInt() == MidiMetaType.TIME_SIGNATURE && m.event.data!!.size == 4)
+            else if (m.event.msb == MidiMetaType.TIME_SIGNATURE && m.event.data!!.size == 4)
                 m.event.data.copyInto(currentTimeSignature, 4)
         }
 
@@ -213,29 +208,29 @@ class MidiPlayer : AutoCloseable
         this.output = output
 
         messages = SmfTrackMerger.merge(music).tracks[0].messages
-        player = MidiEventLooper(messages, timeManager, music.deltaTimeSpec.toInt())
+        player = MidiEventLooper(messages, timeManager, music.deltaTimeSpec.toUnsigned())
         player.starting = Runnable {
             // all control reset on all channels.
             for (i in 0..15) {
-                buffer[0] = (i + 0xB0).toUByte()
-                buffer[1] = 0x79.toUByte()
-                buffer[2] = 0.toUByte()
+                buffer[0] = (i + 0xB0).toByte()
+                buffer[1] = 0x79
+                buffer[2] = 0
                 output.send(buffer, 0, 3, 0)
             }
         }
 
         val listener = object : OnMidiEventListener {
             override fun onEvent(m: MidiEvent) {
-                when (m.eventType.toInt()) {
+                when (m.eventType) {
                     MidiEvent.NOTE_OFF,
                     MidiEvent.NOTE_ON -> {
-                        if (channel_mask != null && channel_mask!![m.channel.toInt()])
+                        if (channel_mask != null && channel_mask!![m.channel.toUnsigned()])
                             return // ignore messages for the masked channel.
                     }
                     MidiEvent.SYSEX,
                     MidiEvent.SYSEX_2 -> {
                         if (buffer.size <= m.data!!.size)
-                            buffer = UByteArray(buffer.size * 2)
+                            buffer = ByteArray(buffer.size * 2)
                         buffer[0] = m.statusByte
                         m.data.copyInto(buffer, 1,0, m.data.size - 1)
                         output.send(buffer, 0, m.data.size + 1, 0)
@@ -274,7 +269,7 @@ class MidiPlayer : AutoCloseable
     private val music: MidiMusic
 
     private var should_dispose_output: Boolean = false
-    private var buffer = UByteArray(0x100)
+    private var buffer = ByteArray(0x100)
     private var channel_mask : BooleanArray? = null
 
     var finished : Runnable?
@@ -311,7 +306,7 @@ class MidiPlayer : AutoCloseable
 
     fun getTotalPlayTimeMilliseconds (): Int
     {
-        return MidiMusic.getTotalPlayTimeMilliseconds (messages, music.deltaTimeSpec.toInt())
+        return MidiMusic.getTotalPlayTimeMilliseconds (messages, music.deltaTimeSpec.toUnsigned())
     }
 
     override fun close ()
@@ -337,9 +332,6 @@ class MidiPlayer : AutoCloseable
             PlayerState.STOPPED-> {
                 if (sync_player_task == null)
                     startLoop()
-                runBlocking {
-                    delay(20) // spin wait a bit
-                }
                 player.play()
             }
         }
@@ -374,7 +366,7 @@ class MidiPlayer : AutoCloseable
         // additionally send all sound off for the muted channels.
         for (ch in 0..15)
             if (channelMask == null || channelMask [ch])
-                output.send (arrayOf((0xB0 + ch).toByte(), 120, 0).toByteArray().toUByteArray(), 0, 3, 0)
+                output.send (arrayOf((0xB0 + ch).toByte(), 120, 0).toByteArray(), 0, 3, 0)
     }
 }
 
@@ -400,7 +392,7 @@ internal class SimpleSeekProcessor(ticks: Int) : SeekProcessor
         current += message.deltaTime
         if (current >= seek_to)
             return SeekFilterResult.PASS_AND_TERMINATE
-        when (message.event.eventType.toInt()) {
+        when (message.event.eventType) {
             MidiEvent.NOTE_ON, MidiEvent.NOTE_OFF ->  return SeekFilterResult.BLOCK
         }
         return SeekFilterResult.PASS

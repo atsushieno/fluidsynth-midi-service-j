@@ -60,11 +60,10 @@ class ApplicationModel(context: Context) {
         var p = MidiPlayer(reader.music)
         p.addOnEventReceivedListener(object: OnMidiEventListener {
             override fun onEvent(e: MidiEvent) {
-                var arr = e.data!!.toByteArray()
                 when (e.statusByte.toInt() and 0xF0) {
-                    0xC0, 0xD0 -> m.send(arr, 0, 2)
-                    0xF0 -> m.send (arr, 0, e.data!!.size)
-                    else -> m.send (arr, 0, 3)
+                    0xC0, 0xD0 -> m.send(e.data, 0, 2)
+                    0xF0 -> m.send (e.data, 0, e.data!!.size)
+                    else -> m.send (e.data, 0, 3)
                 }
             }
         })
