@@ -1,6 +1,7 @@
 package name.atsushieno.ktmidi
 
 import kotlinx.coroutines.*
+import java.util.concurrent.locks.Condition
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -19,8 +20,8 @@ internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: Mid
     private val time_manager: MidiPlayerTimeManager = timeManager
     private val delta_time_spec: Int = deltaTimeSpec
 
-    private val pause_lock = ReentrantLock()
-    private val pause_handle = pause_lock.newCondition()
+    private val lock = ReentrantLock()
+    private val loop_handle = lock.newCondition()
 
     private var do_pause: Boolean = false
     private var do_stop: Boolean = false
@@ -58,7 +59,7 @@ internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: Mid
 
     fun play ()
     {
-        pause_lock.withLock { pause_handle.signal() }
+        lock.withLock { loop_handle.signal() }
         state = PlayerState.PLAYING
     }
 
@@ -74,29 +75,33 @@ internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: Mid
         mute ()
     }
 
-    fun playerLoop ()
+    fun playerLoop (plock: ReentrantLock, cond: Condition)
     {
         starting?.run ()
 
         event_idx = 0
         playDeltaTime = 0
         var doWait = true
-        while (true) {
-            if (doWait) {
-                pause_lock.withLock { pause_handle.await() }
-                doWait = false
+        this.lock.withLock {
+            plock.withLock { cond.signal() }
+
+            while (true) {
+                if (doWait) {
+                    loop_handle.await()
+                    doWait = false
+                }
+                if (do_stop)
+                    break
+                if (do_pause) {
+                    doWait = true
+                    do_pause = false
+                    state = PlayerState.PAUSED
+                    continue
+                }
+                if (event_idx == messages.size)
+                    break
+                processMessage(messages[event_idx++])
             }
-            if (do_stop)
-                break
-            if (do_pause) {
-                doWait = true
-                do_pause = false
-                state = PlayerState.PAUSED
-                continue
-            }
-            if (event_idx == messages.size)
-                break
-            processMessage (messages [event_idx++])
         }
         do_stop = false
         mute ()
@@ -152,7 +157,7 @@ internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: Mid
     {
         if (state != PlayerState.STOPPED) {
             do_stop = true
-            pause_lock.withLock { pause_handle.signal() }
+            lock.withLock { loop_handle.signal() }
             finished?.run ()
         }
     }
@@ -316,10 +321,10 @@ class MidiPlayer : AutoCloseable
             output.close ()
     }
 
-    private fun startLoop ()
+    private fun startLoop (lock: ReentrantLock, cond: Condition)
     {
         sync_player_task = GlobalScope.launch {
-            player.playerLoop ()
+            player.playerLoop (lock, cond)
             sync_player_task = null
         }
     }
@@ -329,9 +334,13 @@ class MidiPlayer : AutoCloseable
         when (state) {
             PlayerState.PLAYING-> return // do nothing
             PlayerState.PAUSED-> { player.play (); return; }
-            PlayerState.STOPPED-> {
+            PlayerState.STOPPED->
+            {
+                var lock = ReentrantLock()
+                var cond = lock.newCondition()
                 if (sync_player_task == null)
-                    startLoop()
+                    startLoop(lock, cond)
+                lock.withLock { cond.await() }
                 player.play()
             }
         }
