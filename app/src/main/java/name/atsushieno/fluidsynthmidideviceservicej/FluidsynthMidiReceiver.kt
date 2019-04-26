@@ -93,8 +93,7 @@ class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
                 0xC0 -> syn.programChange(ch, msg[off].toUnsigned())
                 0xD0 -> syn.channelPressure(ch, msg[off].toUnsigned())
                 0xE0 -> syn.pitchBend(ch, msg[off].toUnsigned() + msg[off + 1].toUnsigned() * 0x80)
-                // FIXME: Non-direct Buffer is not supported
-                //0xF0 -> syn.sysex(msg.copyOfRange(off, off + c - 1), null)
+                0xF0 -> syn.sysex(msg.copyOfRange(off, off + c - 1), null)
             }
             when (stat and 0xF0) {
                 0xC0,0xD0 -> {

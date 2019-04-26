@@ -9,6 +9,7 @@ import com.sun.jna.ptr.PointerByReference
 import fluidsynth.FluidsynthLibrary as library
 import fluidsynth.FluidsynthLibrary.FLUID_FAILED
 import java.nio.ByteBuffer
+import java.nio.channels.ByteChannel
 
 class Synth : FluidsynthObject {
     companion object {
@@ -76,11 +77,15 @@ class Synth : FluidsynthObject {
         val outlen = IntByReference(output?.size ?: 0)
         val handled: IntByReference? = null
 
-        val inptr = Native.getDirectBufferPointer(ByteBuffer.wrap(input, 0, input.size))
-        val outptr = Native.getDirectBufferPointer(ByteBuffer.wrap(output, 0, input.size))
+        // FIXME: it had better avoid extraneous memory allocation here.
+        var inbuf = ByteBuffer.allocateDirect(input.size)
+        inbuf.put(input)
+        val inptr = Native.getDirectBufferPointer(inbuf)
+        // FIXME: support output parameter?
 
-        if (library.fluid_synth_sysex(getHandle(), inptr, input.size, outptr, outlen, handled, if (dryrun) 1 else 0) != 0)
+        if (library.fluid_synth_sysex(getHandle(), inptr, input.size, null, outlen, handled, if (dryrun) 1 else 0) != 0)
             onError("sysex operation failed")
+
         return handled?.value != 0
     }
 
