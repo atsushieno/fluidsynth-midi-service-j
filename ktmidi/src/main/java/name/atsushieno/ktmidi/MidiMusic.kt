@@ -4,6 +4,7 @@ package name.atsushieno.ktmidi
 
 import java.io.InputStream
 import java.io.OutputStream
+import java.lang.IndexOutOfBoundsException
 
 internal fun Byte.toUnsigned() = if (this < 0) 256 + this else this.toInt()
 
@@ -50,7 +51,7 @@ class MidiMusic {
                         break
                     t += m.deltaTime
                     if (m.event.eventType == MidiEvent.META && m.event.msb == MidiMetaType.TEMPO)
-                        tempo = MidiMetaType.getTempo (m.event.data!!)
+                        tempo = MidiMetaType.getTempo (m.event.extraData!!, m.event.extraDataOffset)
                 }
                 return v
             }
@@ -242,16 +243,16 @@ class MidiMetaType
 
         const val DEFAULT_TEMPO = 500000
 
-        fun getTempo (data : ByteArray) : Int
+        fun getTempo (data : ByteArray, offset: Int) : Int
         {
-            var d1 = data [1].toUnsigned()
-            var d1x = d1 shl 8
-            return (data[0].toUnsigned() shl 16) + (data [1].toUnsigned() shl 8) + data [2]
+            if (data.size < offset + 2)
+                throw IndexOutOfBoundsException("data array must be longer than argument offset " + offset + " + 2")
+            return (data[offset].toUnsigned() shl 16) + (data [offset + 1].toUnsigned() shl 8) + data [offset + 2]
         }
 
-        fun getBpm (data : ByteArray) : Double
+        fun getBpm (data : ByteArray, offset: Int) : Double
         {
-            return 60000000.0 / getTempo(data)
+            return 60000000.0 / getTempo(data, offset)
         }
     }
 }
@@ -268,33 +269,49 @@ class MidiEvent
         const val CAF : Byte = 0xD0.toByte()
         const val PITCH : Byte = 0xE0.toByte()
         const val SYSEX : Byte = 0xF0.toByte()
+        const val MTC_QUARTER_FRAME : Byte = 0xF1.toByte()
+        const val SONG_POSITION_POINTER : Byte = 0xF2.toByte()
+        const val SONG_SELECT : Byte = 0xF3.toByte()
+        const val TUNE_REQUEST: Byte = 0xF6.toByte()
         const val SYSEX_2 : Byte = 0xF7.toByte()
+        const val MIDI_CLOCK : Byte = 0xF8.toByte()
+        const val MIDI_TICK : Byte = 0xF9.toByte()
+        const val MIDI_START : Byte = 0xFA.toByte()
+        const val MIDI_CONTINUE : Byte = 0xFB.toByte()
+        const val MIDI_STOP : Byte = 0xFC.toByte()
+        const val ACTIVE_SENSE : Byte = 0xFE.toByte()
+        const val RESET : Byte = 0xFF.toByte()
         const val META : Byte = 0xFF.toByte()
 
         const val EndSysEx = 0xF7
 
-        fun convert (bytes : Array<Byte>, index : Int, size : Int) = sequence {
+        fun convert (bytes : ByteArray, index : Int, size : Int) = sequence {
             var i = index
             val end = index +size
             while (i < end) {
                 if (bytes[i].toUnsigned() == 0xF0) {
-                    val tmp = bytes.copyOfRange(i, size)
-                    yield (MidiEvent (0xF0, 0, 0, tmp.toByteArray()))
+                    yield (MidiEvent (0xF0, 0, 0, bytes, i, size))
                     i += size
                 } else {
                     if (end < i + MidiEvent.fixedDataSize(bytes[i]))
                         throw Exception (String.format("Received data was incomplete to build MIDI status message for '%x' status.", bytes[i]))
                     val z = MidiEvent.fixedDataSize(bytes[i])
-                    yield (MidiEvent (bytes[i].toInt(), bytes [i+1].toInt(), (if (z > 1) bytes [i+2].toInt() else 0), null))
+                    yield (MidiEvent (bytes[i].toInt(), bytes [i+1].toInt(), (if (z > 1) bytes [i+2].toInt() else 0), null, 0, 0))
                     i += z + 1
                 }
             }
         }
 
         fun fixedDataSize (statusByte : Byte) : Byte =
-                when ((statusByte.toUnsigned() and 0xF0).toByte()) {
-                    0xF0.toByte() -> 0 // including 0xF7, 0xFF
-                    PROGRAM, CAF -> 1
+                when ((statusByte.toUnsigned() and 0xF0)) {
+                    0xF0 -> {
+                        when (statusByte.toUnsigned()) {
+                            0xF1, 0xF3 -> 1
+                            0xF2 -> 2
+                            else -> 0
+                        }
+                    } // including 0xF7, 0xFF
+                    0xC0, 0xD0 -> 1
                     else -> 2
                 }
     }
@@ -302,19 +319,25 @@ class MidiEvent
     constructor (value : Int)
     {
         this.value = value
-        this.data = null
+        this.extraData = null
+        this.extraDataOffset = 0
+        this.extraDataLength = 0
     }
 
-    constructor (type : Int, arg1 : Int, arg2 : Int, data : ByteArray?)
+    constructor (type : Int, arg1 : Int, arg2 : Int, extraData : ByteArray?, extraOffset: Int, extraLength: Int)
     {
         this.value = type + (arg1 shl 8) + (arg2 shl 16)
-        this.data = data
+        this.extraData = extraData
+        this.extraDataOffset = extraOffset
+        this.extraDataLength = extraLength
     }
 
     var value : Int = 0
 
     // This expects EndSysEx byte _inclusive_ for F0 message.
-    val data : ByteArray?
+    val extraData : ByteArray?
+    val extraDataOffset : Int
+    val extraDataLength : Int
 
     val statusByte : Byte
         get() = (value and 0xFF).toByte()
@@ -398,9 +421,9 @@ class SmfWriter// default meta event writer.
                 MidiEvent.META -> metaEventWriter(false, e, stream)
                 MidiEvent.SYSEX, MidiEvent.SYSEX_2 -> {
                     stream.writeByte(e.event.eventType)
-                    if (e.event.data != null) {
-                        write7BitVariableInteger(e.event.data.size)
-                        stream.write(e.event.data, 0, e.event.data.size)
+                    if (e.event.extraData != null) {
+                        write7BitVariableInteger(e.event.extraDataLength)
+                        stream.write(e.event.extraData, e.event.extraDataOffset, e.event.extraDataLength)
                     }
                 }
                 else -> {
@@ -446,9 +469,9 @@ class SmfWriter// default meta event writer.
                 MidiEvent.META -> size += metaEventWriter (true, e, null)
                 MidiEvent.SYSEX, MidiEvent.SYSEX_2 -> {
                     size++
-                    if (e.event.data != null) {
-                        size += getVariantLength(e.event.data.size)
-                        size += e.event.data.size
+                    if (e.event.extraData != null) {
+                        size += getVariantLength(e.event.extraDataLength)
+                        size += e.event.extraDataLength
                     }
                 }
                 else -> {
@@ -490,20 +513,20 @@ class SmfWriterExtension
 
         private fun defaultMetaWriterFunc (lengthMode : Boolean, e : MidiMessage , stream : OutputStream?) : Int
         {
-            if (e.event.data == null || stream == null)
+            if (e.event.extraData == null || stream == null)
                 return 0
 
             if (lengthMode) {
                 // [0x00] 0xFF metaType size ... (note that for more than one meta event it requires step count of 0).
-                val repeatCount : Int = e.event.data.size / 0x7F
+                val repeatCount : Int = e.event.extraDataLength / 0x7F
                 if (repeatCount == 0)
-                    return 3 + e.event.data.size
-                val mod : Int = e.event.data.size % 0x7F
+                    return 3 + e.event.extraDataLength
+                val mod : Int = e.event.extraDataLength % 0x7F
                 return repeatCount * (4 + 0x7F) - 1 + if (mod > 0) 4 + mod else 0
             }
 
             var written = 0
-            val total : Int = e . event.data.size
+            val total : Int = e . event.extraDataLength
             while (written < total) {
                 if (written > 0)
                     stream.writeByte(0) // step
@@ -511,7 +534,7 @@ class SmfWriterExtension
                 stream.writeByte(e.event.metaType)
                 val size = Math.min(0x7F, total - written)
                 stream.writeByte(size.toByte())
-                stream.write(e.event.data, written, size)
+                stream.write(e.event.extraData, e.event.extraDataOffset + written, size)
                 written += size
             }
             return 0
@@ -521,21 +544,21 @@ class SmfWriterExtension
 
         private fun vsqMetaTextSplitterFunc (lengthMode : Boolean, e : MidiMessage , stream : OutputStream?) : Int
         {
-            if (e.event.data == null)
+            if (e.event.extraData == null)
                 return 0
 
             // The split should not be applied to "Master Track"
-            if (e.event.data.size < 0x80) {
+            if (e.event.extraDataLength < 0x80) {
                 return DEFAULT_META_EVENT_WRITER(lengthMode, e, stream)
             }
 
             if (lengthMode) {
                 // { [0x00] 0xFF metaType DM:xxxx:... } * repeat + 0x00 0xFF metaType DM:xxxx:mod...
                 // (note that for more than one meta event it requires step count of 0).
-                val repeatCount = e.event.data.size / 0x77
+                val repeatCount = e.event.extraDataLength / 0x77
                 if (repeatCount == 0)
-                    return 11 + e.event.data.size
-                val mod = e.event.data.size % 0x77
+                    return 11 + e.event.extraDataLength
+                val mod = e.event.extraDataLength % 0x77
                 return repeatCount * (12 + 0x77) - 1 + if (mod > 0) 12+mod else 0
             }
 
@@ -544,7 +567,7 @@ class SmfWriterExtension
 
 
             var written = 0
-            val total: Int = e.event.data.size
+            val total: Int = e.event.extraDataLength
             var idx = 0
             do {
                 if (written > 0)
@@ -554,7 +577,7 @@ class SmfWriterExtension
                 val size = Math.min(0x77, total - written)
                 stream.writeByte((size + 8).toByte())
                 stream.write(String.format("DM:{0:D04}:", idx++).toByteArray(), 0, 8)
-                stream.write(e.event.data, written, size)
+                stream.write(e.event.extraData, e.event.extraDataOffset + written, size)
                 written += size
             } while (written < total)
             return 0
@@ -619,7 +642,7 @@ class SmfReader(private var stream: InputStream) {
                 val args = ByteArray(len)
                 if (len > 0)
                     readBytes(args)
-                return MidiMessage (deltaTime, MidiEvent (running_status.toInt(), metaType.toInt(), 0, args))
+                return MidiMessage (deltaTime, MidiEvent (running_status.toInt(), metaType.toInt(), 0, args, 0, len))
             }
             else -> {
                 var value = running_status.toUnsigned()

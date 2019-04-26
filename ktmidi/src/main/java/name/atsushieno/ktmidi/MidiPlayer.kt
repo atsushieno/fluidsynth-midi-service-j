@@ -66,7 +66,7 @@ internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: Mid
     fun mute ()
     {
         for (i in 0..15)
-            onEvent (MidiEvent (i + 0xB0, 0x78, 0, null))
+            onEvent (MidiEvent (i + 0xB0, 0x78, 0, null, 0, 0))
     }
 
     fun pause ()
@@ -139,9 +139,9 @@ internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: Mid
 
         if (m.event.statusByte == 0xFF.toByte()) {
             if (m.event.msb == MidiMetaType.TEMPO)
-                currentTempo = MidiMetaType.getTempo (m.event.data!!)
-            else if (m.event.msb == MidiMetaType.TIME_SIGNATURE && m.event.data!!.size == 4)
-                m.event.data.copyInto(currentTimeSignature, 4)
+                currentTempo = MidiMetaType.getTempo (m.event.extraData!!, m.event.extraDataOffset)
+            else if (m.event.msb == MidiMetaType.TIME_SIGNATURE && m.event.extraDataLength == 4)
+                m.event.extraData!!.copyInto(currentTimeSignature, 4, m.event.extraDataOffset, m.event.extraDataLength)
         }
 
         onEvent (m.event)
@@ -234,11 +234,11 @@ class MidiPlayer : AutoCloseable
                     }
                     MidiEvent.SYSEX,
                     MidiEvent.SYSEX_2 -> {
-                        if (buffer.size <= m.data!!.size)
+                        if (buffer.size <= m.extraDataLength)
                             buffer = ByteArray(buffer.size * 2)
                         buffer[0] = m.statusByte
-                        m.data.copyInto(buffer, 1,0, m.data.size - 1)
-                        output.send(buffer, 0, m.data.size + 1, 0)
+                        m.extraData!!.copyInto(buffer, 1,m.extraDataOffset, m.extraDataLength - 1)
+                        output.send(buffer, 0, m.extraDataLength + 1, 0)
                         return
                     }
                     MidiEvent.META -> {
