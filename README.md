@@ -2,6 +2,8 @@
 
 ![demo movie](docs/demo.mp4)
 
+Beta packages are available at [DeployGate](https://dply.me/l0etkk).
+
 It is an Android MIDI device service implementation based on [Fluidsynth software synthesizer](https://github.com/Fluidsynth/fluidsynth/).
 
 Since Android 6.0 (Marshmallow), it started to provide the standard way to
