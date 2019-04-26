@@ -628,26 +628,26 @@ class SmfReader(private var stream: InputStream) {
     }
 
     private var current_track_size : Int = 0
-    private var running_status : Byte = 0
+    private var running_status : Int = 0
 
     private fun readMessage (deltaTime : Int) : MidiMessage
     {
         val b = peekByte ().toUnsigned()
-        running_status = if (b < 0x80) running_status else readByte ()
+        running_status = if (b < 0x80) running_status else readByte ().toUnsigned()
         val len: Int
         when (running_status) {
-            MidiEvent.SYSEX, MidiEvent.SYSEX_2, MidiEvent.META -> {
-                val metaType = if (running_status == MidiEvent.META) readByte () else 0
+            MidiEvent.SYSEX.toUnsigned(), MidiEvent.SYSEX_2.toUnsigned(), MidiEvent.META.toUnsigned() -> {
+                val metaType = if (running_status == MidiEvent.META.toUnsigned()) readByte () else 0
                 len = readVariableLength()
                 val args = ByteArray(len)
                 if (len > 0)
                     readBytes(args)
-                return MidiMessage (deltaTime, MidiEvent (running_status.toInt(), metaType.toInt(), 0, args, 0, len))
+                return MidiMessage (deltaTime, MidiEvent (running_status, metaType.toUnsigned(), 0, args, 0, len))
             }
             else -> {
-                var value = running_status.toUnsigned()
+                var value = running_status
                 value += readByte().toUnsigned() shl 8
-                if (MidiEvent.fixedDataSize(running_status) == 2.toByte())
+                if (MidiEvent.fixedDataSize(running_status.toByte()) == 2.toByte())
                     value += readByte().toUnsigned() shl 16
                 return MidiMessage (deltaTime, MidiEvent (value))
             }

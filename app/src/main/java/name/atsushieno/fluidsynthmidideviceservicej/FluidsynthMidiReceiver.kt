@@ -9,6 +9,7 @@ import fluidsynth.Settings
 import fluidsynth.SoundFontLoader
 import fluidsynth.Synth
 
+internal fun Byte.toUnsigned() = if (this < 0) 256 + this else this.toInt()
 
 class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
 {
@@ -68,7 +69,7 @@ class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
         var c = count
         var runningStatus = 0
         while (c > 0) {
-            var stat = msg[off].toUByte().toInt()
+            var stat = msg[off].toUnsigned()
             if (stat < 0x80) {
                 stat = runningStatus
             } else {
@@ -78,21 +79,22 @@ class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
             runningStatus = stat
             val ch = stat and 0x0F
             when (stat and 0xF0) {
-                0x80 -> syn.noteOff(ch, msg[off].toInt())
+                0x80 -> syn.noteOff(ch, msg[off].toUnsigned())
                 0x90 -> {
                     if (msg[off + 1].toInt() == 0)
-                        syn.noteOff(ch, msg[off].toInt())
+                        syn.noteOff(ch, msg[off].toUnsigned())
                     else
-                        syn.noteOn(ch, msg[off].toInt(), msg[off + 1].toInt())
+                        syn.noteOn(ch, msg[off].toUnsigned(), msg[off + 1].toUnsigned())
                 }
                 0xA0 -> {
                     // No PAf in fluidsynth?
                 }
-                0xB0 -> syn.cc(ch, msg[off].toInt(), msg[off + 1].toInt())
-                0xC0 -> syn.programChange(ch, msg[off].toInt())
-                0xD0 -> syn.channelPressure(ch, msg[off].toInt())
-                0xE0 -> syn.pitchBend(ch, msg[off] + msg[off + 1] * 0x80)
-                0xF0 -> syn.sysex(msg.copyOfRange(off, c - 1), null)
+                0xB0 -> syn.cc(ch, msg[off].toUnsigned(), msg[off + 1].toUnsigned())
+                0xC0 -> syn.programChange(ch, msg[off].toUnsigned())
+                0xD0 -> syn.channelPressure(ch, msg[off].toUnsigned())
+                0xE0 -> syn.pitchBend(ch, msg[off].toUnsigned() + msg[off + 1].toUnsigned() * 0x80)
+                // FIXME: Non-direct Buffer is not supported
+                //0xF0 -> syn.sysex(msg.copyOfRange(off, off + c - 1), null)
             }
             when (stat and 0xF0) {
                 0xC0,0xD0 -> {

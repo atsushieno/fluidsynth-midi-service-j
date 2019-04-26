@@ -53,7 +53,7 @@ class ApplicationModel(context: Context) {
         }
     }
 
-    val tmp_arr = ByteArray(3)
+    private var tmp_arr = ByteArray(3)
 
     fun playMusic(musicAsset: String, m: MidiReceiver)
     {
@@ -62,9 +62,14 @@ class ApplicationModel(context: Context) {
         var p = MidiPlayer(reader.music)
         p.addOnEventReceivedListener(object: OnMidiEventListener {
             override fun onEvent(e: MidiEvent) {
-                if (e.data != null)
-                    m.send (e.data, 0, e.data!!.size)
-                else {
+                if (e.extraData != null) {
+                    // FIXME: ugh, this is ugly. Can we make changes to how we pass data array?
+                    if (tmp_arr.size < e.extraDataLength + 1)
+                        tmp_arr = ByteArray(e.extraDataLength + 1)
+                    tmp_arr[0] = e.statusByte
+                    e.extraData!!.copyInto(tmp_arr, 1, e.extraDataOffset, e.extraDataOffset + e.extraDataLength)
+                    m.send(tmp_arr, 0, tmp_arr.size)
+                } else {
                     var size = MidiEvent.fixedDataSize(e.statusByte)
                     tmp_arr[0] = e.statusByte
                     tmp_arr[1] = e.msb

@@ -137,14 +137,14 @@ internal class MidiEventLooper(var messages: List<MidiMessage>, timeManager: Mid
             playDeltaTime += m.deltaTime
         }
 
-        if (m.event.statusByte == 0xFF.toByte()) {
+        if (m.event.statusByte.toUnsigned() == 0xFF) {
             if (m.event.msb == MidiMetaType.TEMPO)
                 currentTempo = MidiMetaType.getTempo (m.event.extraData!!, m.event.extraDataOffset)
             else if (m.event.msb == MidiMetaType.TIME_SIGNATURE && m.event.extraDataLength == 4)
-                m.event.extraData!!.copyInto(currentTimeSignature, 4, m.event.extraDataOffset, m.event.extraDataLength)
+                m.event.extraData!!.copyInto(currentTimeSignature, 0, m.event.extraDataOffset, m.event.extraDataOffset + m.event.extraDataLength)
         }
-
-        onEvent (m.event)
+        else
+            onEvent (m.event)
     }
 
     private fun onEvent (m: MidiEvent)
