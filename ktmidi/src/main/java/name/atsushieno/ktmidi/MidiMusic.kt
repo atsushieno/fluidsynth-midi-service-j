@@ -296,7 +296,7 @@ class MidiEvent
                     if (end < i + MidiEvent.fixedDataSize(bytes[i]))
                         throw Exception (String.format("Received data was incomplete to build MIDI status message for '%x' status.", bytes[i]))
                     val z = MidiEvent.fixedDataSize(bytes[i])
-                    yield (MidiEvent (bytes[i].toInt(), bytes [i+1].toInt(), (if (z > 1) bytes [i+2].toInt() else 0), null, 0, 0))
+                    yield (MidiEvent (bytes[i].toUnsigned(), (if (z > 0) bytes [i + 1].toUnsigned() else 0), (if (z > 1) bytes [i + 2].toUnsigned() else 0), null, 0, 0))
                     i += z + 1
                 }
             }
