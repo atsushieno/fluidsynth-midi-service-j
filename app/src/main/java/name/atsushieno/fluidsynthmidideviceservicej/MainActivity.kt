@@ -46,6 +46,8 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
     lateinit var midi_manager : MidiManager
     var midi_input : MidiInputPort? = null
 
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    fun onLifecyclePause () { disposeInput() }
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     fun onLifecycleStop () { disposeInput() }
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -53,6 +55,7 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
 
     fun disposeInput()
     {
+        vm.model.stopMusic()
         if (midi_input != null) {
             Log.d("FluidsynthMidiService", "[MainActivity] disposed midi input")
             midi_input?.close()
