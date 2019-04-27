@@ -29,19 +29,31 @@ class FluidsynthMidiDeviceService : MidiDeviceService(), LifecycleOwner
         fun dispose ()
         {
             Log.d("FluidsynthMidiService", "[MidiDeviceService] being disposed.")
-            service.fluidsynth_receiver?.dispose()
-            service.fluidsynth_receiver = null
+            service.disposeReceivers()
         }
     }
 
-    var fluidsynth_receiver : FluidsynthMidiReceiver? = null
+    var port_count = 4
+    lateinit var fluidsynth_receivers: ArrayList<FluidsynthMidiReceiver>
+
+    internal fun disposeReceivers()
+    {
+        if (this::fluidsynth_receivers.isInitialized)
+            for (r in fluidsynth_receivers)
+                r.dispose()
+    }
 
     override fun onGetInputPortReceivers(): Array<MidiReceiver> {
-        if (fluidsynth_receiver == null || fluidsynth_receiver!!.isDisposed()) {
-            fluidsynth_receiver = FluidsynthMidiReceiver(this.applicationContext)
-            lifecycle.addObserver(FluidsynthLifecycleObserver(this))
+        if (!this::fluidsynth_receivers.isInitialized) {
+            fluidsynth_receivers = ArrayList<FluidsynthMidiReceiver>()
+            for (i in 0 until port_count)
+                fluidsynth_receivers.add(FluidsynthMidiReceiver(this.applicationContext))
         }
-        return arrayOf (fluidsynth_receiver as MidiReceiver)
+        for (i in 0 until port_count) {
+            if (fluidsynth_receivers [i].isDisposed())
+                fluidsynth_receivers [i] = FluidsynthMidiReceiver(this.applicationContext)
+        }
+        return fluidsynth_receivers.toTypedArray()
     }
 
     val dispatcher = ServiceLifecycleDispatcher(this)
@@ -49,6 +61,7 @@ class FluidsynthMidiDeviceService : MidiDeviceService(), LifecycleOwner
     override fun onCreate() {
         dispatcher.onServicePreSuperOnCreate()
         super.onCreate()
+        lifecycle.addObserver(FluidsynthLifecycleObserver(this))
     }
 
     override fun onBind(intent: Intent?): IBinder? {
