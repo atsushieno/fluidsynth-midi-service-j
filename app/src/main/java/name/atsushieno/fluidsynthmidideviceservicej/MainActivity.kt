@@ -17,6 +17,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import name.atsushieno.fluidsynthmidideviceservicej.databinding.ActivityMainBinding
 import name.atsushieno.ktmidi.MidiMusic
 import name.atsushieno.ktmidi.MidiPlayer
+import name.atsushieno.ktmidi.PlayerState
 import name.atsushieno.ktmidi.SmfReader
 
 class MainActivity : AppCompatActivity(), LifecycleObserver {
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         lateinit var midiMusicAdapter: ArrayAdapter<String>
         lateinit var soundFontAdapter: ArrayAdapter<String>
 
+        fun getSelectedSoundFont() = view.spinner_soundfont.selectedItem as String
         fun getSelectedMusic() = view.spinner_songs.selectedItem as String
     }
 
@@ -109,8 +111,11 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
                 midi = FluidsynthMidiReceiver(this.applicationContext)
             if (vm.model.isPlayingMusic()) {
                 vm.model.stopMusic()
+                button_play_smf.text = getString(R.string.play)
             } else {
                 vm.model.playMusic(vm.getSelectedMusic(), midi)
+                vm.model.player!!.playbackCompletedToEnd = Runnable { button_play_smf.text = getString (R.string.play) }
+                button_play_smf.text = getString(R.string.stop)
             }
         }
     }

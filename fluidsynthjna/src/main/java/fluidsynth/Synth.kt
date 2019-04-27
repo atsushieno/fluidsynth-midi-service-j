@@ -41,36 +41,39 @@ class Synth : FluidsynthObject {
     }
 
 
-    var handleError: ((String, String) -> Boolean)? = null
+    var handleError: ((Int, String, String) -> Boolean)? = null
 
-    private fun onError(message: String) {
+    private fun onError(errorCode: Int, message: String) {
         val err = getLastError()
-        if (handleError == null || !(handleError?.invoke(message, err)!!))
+        if (handleError == null || !(handleError?.invoke(errorCode, message, err)!!))
             throw FluidsynthInteropException("$message (native error: $err)")
     }
 
     fun noteOn(channel: Int, key: Int, vel: Int) {
         val ret = library.fluid_synth_noteon(getHandle(), channel, key, vel)
         if (ret != 0)
-            onError("noteon operation failed (error code " + ret+ ")")
+            onError(ret, "noteon operation failed (error code " + ret+ ")")
     }
 
     fun noteOff(channel: Int, key: Int) {
         // not sure if we should always raise exception, it seems that it also returns FUILD_FAILED for not-on-state note.
-        if (library.fluid_synth_noteoff(getHandle(), channel, key) != 0)
-            onError("noteoff operation failed")
+        val ret = library.fluid_synth_noteoff(getHandle(), channel, key)
+        if (ret != 0)
+            onError(ret, "noteoff operation failed")
     }
 
     fun cc(channel: Int, num: Int, v: Int) {
-        if (library.fluid_synth_cc(getHandle(), channel, num, v) != 0)
-            onError("control change operation failed")
+        val ret = library.fluid_synth_cc(getHandle(), channel, num, v)
+        if (ret != 0)
+            onError(ret, "control change operation failed")
     }
 
     fun getCC(channel: Int, num: Int): Int {
-        val ret = IntByReference()
-        if (library.fluid_synth_get_cc(getHandle(), channel, num, ret) != 0)
-            onError("control change get operation failed")
-        return ret.value
+        val ref = IntByReference()
+        val ret = library.fluid_synth_get_cc(getHandle(), channel, num, ref)
+        if (ret != 0)
+            onError(ret,"control change get operation failed")
+        return ref.value
     }
 
     fun sysex(input: ByteArray, output: ByteArray?, dryrun: Boolean = false): Boolean {
@@ -83,74 +86,87 @@ class Synth : FluidsynthObject {
         val inptr = Native.getDirectBufferPointer(inbuf)
         // FIXME: support output parameter?
 
-        if (library.fluid_synth_sysex(getHandle(), inptr, input.size, null, outlen, handled, if (dryrun) 1 else 0) != 0)
-            onError("sysex operation failed")
+        val ret = library.fluid_synth_sysex(getHandle(), inptr, input.size, null, outlen, handled, if (dryrun) 1 else 0)
+        if (ret != 0)
+            onError(ret,"sysex operation failed")
 
         return handled?.value != 0
     }
 
     fun pitchBend(channel: Int, v: Int) {
-        if (library.fluid_synth_pitch_bend(getHandle(), channel, v) != 0)
-            onError("pitch bend change operation failed")
+        val ret = library.fluid_synth_pitch_bend(getHandle(), channel, v)
+        if (ret != 0)
+            onError(ret, "pitch bend change operation failed")
     }
 
     fun getPitchBend(channel: Int): Int {
-        val ret: IntByReference? = null
-        if (library.fluid_synth_get_pitch_bend(getHandle(), channel, ret) != 0)
-            onError("pitch bend get operation failed")
-        return ret!!.value
+        val ref: IntByReference? = null
+        var ret = library.fluid_synth_get_pitch_bend(getHandle(), channel, ref)
+        if (ret != 0)
+            onError(ret, "pitch bend get operation failed")
+        return if (ref != null) ref.value else 0
     }
 
     fun pitchWheelSens(channel: Int, v: Int) {
-        if (library.fluid_synth_pitch_wheel_sens(getHandle(), channel, v) != 0)
-            onError("pitch wheel sens change operation failed")
+        val ret = library.fluid_synth_pitch_wheel_sens(getHandle(), channel, v)
+        if (ret != 0)
+            onError(ret,"pitch wheel sens change operation failed")
     }
 
     fun getPitchWheelSens(channel: Int): Int {
-        val ret: IntByReference? = null
-        if (library.fluid_synth_get_pitch_wheel_sens(getHandle(), channel, ret) != 0)
-            onError("pitch wheel sens get operation failed")
-        return ret!!.value
+        val ref: IntByReference? = null
+        val ret = library.fluid_synth_get_pitch_wheel_sens(getHandle(), channel, ref)
+        if (ret != 0)
+            onError(ret,"pitch wheel sens get operation failed")
+        return ref!!.value
     }
 
     fun programChange(channel: Int, program: Int) {
-        if (library.fluid_synth_program_change(getHandle(), channel, program) != 0)
-            onError("program change operation failed")
+        val ret = library.fluid_synth_program_change(getHandle(), channel, program)
+        if (ret != 0)
+            onError(ret,"program change operation failed")
     }
 
     fun channelPressure(channel: Int, v: Int) {
-        if (library.fluid_synth_channel_pressure(getHandle(), channel, v) != 0)
-            onError("channel pressure change operation failed")
+        val ret = library.fluid_synth_channel_pressure(getHandle(), channel, v)
+        if (ret != 0)
+            onError(ret,"channel pressure change operation failed")
     }
 
     fun bankSelect(channel: Int, bank: Int) {
-        if (library.fluid_synth_bank_select(getHandle(), channel, bank) != 0)
-            onError("bank select operation failed")
+        val ret = library.fluid_synth_bank_select(getHandle(), channel, bank)
+        if (ret != 0)
+            onError(ret,"bank select operation failed")
     }
 
     fun soundFontSelect(channel: Int, soundFontId: Int) {
-        if (library.fluid_synth_sfont_select(getHandle(), channel, soundFontId) != 0)
-            onError("sound font select operation failed")
+        val ret = library.fluid_synth_sfont_select(getHandle(), channel, soundFontId)
+        if (ret != 0)
+            onError(ret,"sound font select operation failed")
     }
 
     fun programSelect(channel: Int, soundFontId: Int, bank: Int, preset: Int) {
-        if (library.fluid_synth_program_select(getHandle(), channel, soundFontId, bank, preset) != 0)
-            onError("program select operation failed")
+        val ret = library.fluid_synth_program_select(getHandle(), channel, soundFontId, bank, preset)
+        if (ret != 0)
+            onError(ret,"program select operation failed")
     }
 
     fun programSelectBySoundFontName(channel: Int, soundFontName: String, bank: Int, preset: Int) {
-        if (library.fluid_synth_program_select_by_sfont_name(getHandle(), channel, soundFontName, bank, preset) != 0)
-            onError("program select (by sound font name) operation failed")
+        val ret = library.fluid_synth_program_select_by_sfont_name(getHandle(), channel, soundFontName, bank, preset)
+        if (ret != 0)
+            onError(ret, "program select (by sound font name) operation failed")
     }
 
     fun getProgram(channel: Int, soundFontId: IntByReference, bank: IntByReference, preset: IntByReference) {
-        if (library.fluid_synth_get_program(getHandle(), channel, soundFontId, bank, preset) != 0)
-            onError("program get operation failed")
+        val ret = library.fluid_synth_get_program(getHandle(), channel, soundFontId, bank, preset)
+        if (ret != 0)
+            onError(ret,"program get operation failed")
     }
 
     fun unsetProgram(channel: Int) {
-        if (library.fluid_synth_unset_program(getHandle(), channel) != 0)
-            onError("program unset operation failed")
+        val ret = library.fluid_synth_unset_program(getHandle(), channel)
+        if (ret != 0)
+            onError(ret,"program unset operation failed")
     }
 
     /*ERROR
@@ -163,13 +179,15 @@ class Synth : FluidsynthObject {
     */
 
     fun programReset() {
-        if (library.fluid_synth_program_reset(getHandle()) != 0)
-            onError("program reset operation failed")
+        val ret = library.fluid_synth_program_reset(getHandle())
+        if (ret != 0)
+            onError(ret,"program reset operation failed")
     }
 
     fun systemReset() {
-        if (library.fluid_synth_system_reset(getHandle()) != 0)
-            onError("system reset operation failed")
+        val ret = library.fluid_synth_system_reset(getHandle())
+        if (ret != 0)
+            onError(ret,"system reset operation failed")
     }
 
     // fluid_synth_get_channel_preset() is deprecated, so I don't bind it.
@@ -178,22 +196,22 @@ class Synth : FluidsynthObject {
 
     fun loadSoundFont(filename: String, resetPresets: Boolean) {
         if (library.fluid_synth_sfload(getHandle(), filename, if (resetPresets) 1 else 0) == FLUID_FAILED)
-            onError("sound font load operation failed")
+            onError(FLUID_FAILED, "sound font load operation failed")
     }
 
     fun reloadSoundFont(id: Int) {
         if (library.fluid_synth_sfreload(getHandle(), id) == FLUID_FAILED)
-            onError("sound font reload operation failed")
+            onError(FLUID_FAILED,"sound font reload operation failed")
     }
 
     fun unloadSoundFont(id: Int, resetPresets: Boolean) {
         if (library.fluid_synth_sfunload(getHandle(), id, if (resetPresets) 1 else 0) == FLUID_FAILED)
-        onError("sound font unload operation failed")
+        onError(FLUID_FAILED,"sound font unload operation failed")
     }
 
     fun addSoundFont(soundFont: SoundFont) {
         if (library.fluid_synth_add_sfont(getHandle(), soundFont.getHandle()) == FLUID_FAILED)
-            onError("sound font add operation failed")
+            onError(FLUID_FAILED,"sound font add operation failed")
     }
 
     fun removeSoundFont(soundFont: SoundFont) {
@@ -224,8 +242,9 @@ class Synth : FluidsynthObject {
 
     fun setBankOffset (soundFontId : Int, offset : Int)
     {
-        if (library.fluid_synth_set_bank_offset (getHandle(), soundFontId, offset) != 0)
-            onError ("bank offset set operation failed")
+        val ret = library.fluid_synth_set_bank_offset (getHandle(), soundFontId, offset)
+        if (ret != 0)
+            onError (ret, "bank offset set operation failed")
     }
 
     fun getBankOffset (soundFontId : Int)
@@ -328,14 +347,16 @@ class Synth : FluidsynthObject {
 
     fun setInterpolationMethod (channel : Int, interpolationMethod : Int/*FluidInterpolation*/)
     {
-        if (library.fluid_synth_set_interp_method (getHandle(), channel, interpolationMethod) != 0)
-            onError ("interpolation method set operation failed")
+        val ret = library.fluid_synth_set_interp_method (getHandle(), channel, interpolationMethod)
+        if (ret != 0)
+            onError (ret, "interpolation method set operation failed")
     }
 
     fun setGenerator (channel : Int, param : Int, v : Float)
     {
-        if (library.fluid_synth_set_gen (getHandle(), channel, param, v) != 0)
-            onError ("generator set operation failed")
+        val ret = library.fluid_synth_set_gen (getHandle(), channel, param, v)
+        if (ret != 0)
+            onError (ret, "generator set operation failed")
     }
 
     /*ERROR
@@ -415,8 +436,9 @@ class Synth : FluidsynthObject {
 
     fun activateTuning (channel : Int, bank : Int, prog : Int, shouldApply : Boolean)
     {
-        if (library.fluid_synth_activate_tuning (getHandle(), channel, bank, prog, if (shouldApply) 1 else 0) != 0)
-            onError ("tuning activate operation failed")
+        val ret = library.fluid_synth_activate_tuning (getHandle(), channel, bank, prog, if (shouldApply) 1 else 0)
+        if (ret != 0)
+            onError (ret,"tuning activate operation failed")
     }
 
     /*ERROR
@@ -429,8 +451,9 @@ class Synth : FluidsynthObject {
 
     fun deactivateTuning (channel : Int, shouldApply : Boolean)
     {
-        if (library.fluid_synth_deactivate_tuning (getHandle(), channel, if (shouldApply) 1 else 0) != 0)
-            onError ("tuning deactivate operation failed")
+        val ret = library.fluid_synth_deactivate_tuning (getHandle(), channel, if (shouldApply) 1 else 0)
+        if (ret != 0)
+            onError (ret,"tuning deactivate operation failed")
     }
 
     fun tuningIterationStart ()
@@ -468,28 +491,32 @@ class Synth : FluidsynthObject {
 
     fun writeSample16 (length : Int, leftOut : Pointer/*ShortArray*/, leftOffset : Int, leftIncrement : Int, rightOut : Pointer/*ShortArray*/, rightOffset : Int, rightIncrement : Int)
     {
-        if (library.fluid_synth_write_s16 (getHandle(), length, leftOut, leftOffset, leftIncrement, rightOut, rightOffset, rightIncrement) != 0)
-            onError ("16bit sample write operation failed")
+        val ret = library.fluid_synth_write_s16 (getHandle(), length, leftOut, leftOffset, leftIncrement, rightOut, rightOffset, rightIncrement)
+        if (ret != 0)
+            onError (ret, "16bit sample write operation failed")
     }
 
     fun writeSampleFloat (length : Int, leftOut : Pointer/*FloatArray*/, leftOffset : Int, leftIncrement : Int, rightOut : Pointer/*FloatArray*/, rightOffset : Int, rightIncrement : Int)
     {
-        if (library.fluid_synth_write_float (getHandle(), length, leftOut, leftOffset, leftIncrement, rightOut, rightOffset, rightIncrement) != 0)
-            onError ("float sample write operation failed")
+        val ret = library.fluid_synth_write_float (getHandle(), length, leftOut, leftOffset, leftIncrement, rightOut, rightOffset, rightIncrement)
+        if (ret != 0)
+            onError (ret,"float sample write operation failed")
     }
 
     fun writeSampleFloat (length : Int, leftOut : PointerByReference /*Float[]*/, rightOut : PointerByReference/*Float[]*/)
     {
         val dummy = PointerByReference(Pointer.NULL)
         val dummy2 = PointerByReference(Pointer.NULL)
-        if (library.fluid_synth_nwrite_float (getHandle(), length, leftOut, rightOut, dummy, dummy2) != 0)
-            onError ("float sample write operation failed")
+        val ret = library.fluid_synth_nwrite_float (getHandle(), length, leftOut, rightOut, dummy, dummy2)
+        if (ret != 0)
+            onError (ret,"float sample write operation failed")
     }
 
     fun process (length : Int, nIn : Int, inBuffer : PointerByReference/*FloatArray[]*/, nOut : Int, outBuffer : PointerByReference/*FloatArray[]*/)
     {
-        if (library.fluid_synth_process (getHandle(), length, nIn, inBuffer, nOut, outBuffer) != 0)
-            onError ("float sample write operation failed")
+        val ret = library.fluid_synth_process (getHandle(), length, nIn, inBuffer, nOut, outBuffer)
+        if (ret != 0)
+            onError (ret, "float sample write operation failed")
     }
 
     fun addSoundFontLoader (loader : SoundFontLoader)
@@ -501,7 +528,7 @@ class Synth : FluidsynthObject {
     {
         val ret = library.fluid_synth_alloc_voice (getHandle(), sample, channel, key, vel)
         if (ret == Pointer.NULL)
-            onError ("voice allocate operation failed")
+            onError (0,"voice allocate operation failed")
         return Voice(ret)
     }
 

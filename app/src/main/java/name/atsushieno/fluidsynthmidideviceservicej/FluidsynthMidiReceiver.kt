@@ -2,6 +2,7 @@ package name.atsushieno.fluidsynthmidideviceservicej
 
 import android.content.Context
 import android.media.midi.MidiReceiver
+import android.util.Log
 import fluidsynth.androidextensions.AndroidLogger
 import fluidsynth.androidextensions.AndroidNativeAssetSoundFontLoader
 import fluidsynth.AudioDriver
@@ -39,6 +40,13 @@ class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
         //asset_sfloader = AndroidAssetSoundFontLoader(settings, context.assets)
         asset_sfloader = AndroidNativeAssetSoundFontLoader(settings, context.assets)
         syn = Synth (settings)
+        syn.handleError = fun (errorCode: Int, wrapperError: String, nativeError: String) : Boolean {
+            Log.d("FluidsynthMidiService", "$wrapperError (error code $errorCode: $nativeError)")
+            when (wrapperError) {
+                "noteoff operation failed" -> return true
+                else -> return false
+            }
+        }
         syn.addSoundFontLoader (asset_sfloader)
 
         for (sf in ApplicationModel.getInstance(context).soundFonts)

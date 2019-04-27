@@ -33,8 +33,8 @@ class FluidsynthMidiDeviceService : MidiDeviceService(), LifecycleOwner
         }
     }
 
-    var port_count = 4
-    lateinit var fluidsynth_receivers: ArrayList<FluidsynthMidiReceiver>
+    private var port_count = 1
+    private lateinit var fluidsynth_receivers: ArrayList<FluidsynthMidiReceiver>
 
     internal fun disposeReceivers()
     {
@@ -62,6 +62,7 @@ class FluidsynthMidiDeviceService : MidiDeviceService(), LifecycleOwner
         dispatcher.onServicePreSuperOnCreate()
         super.onCreate()
         lifecycle.addObserver(FluidsynthLifecycleObserver(this))
+        port_count = ApplicationModel.getInstance(this).portCount
     }
 
     override fun onBind(intent: Intent?): IBinder? {

@@ -229,7 +229,7 @@
                     android:layout_marginEnd="16dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/spinner_songs"
-                    android:text="@string/play" />
+                    android:text="@={vm.model.playerStateString}" />
 
     </android.support.constraint.ConstraintLayout>
 </layout>

@@ -20,6 +20,7 @@ class ApplicationModel(context: Context) {
     }
 
     val context: Context
+    var portCount = 1
     val soundFonts : MutableList<String>
 
     var sampleRate : Int = 44100
@@ -43,6 +44,9 @@ class ApplicationModel(context: Context) {
     var framesPerBufferString
         get() = framesPerBuffer.toString()
         set(v) { framesPerBuffer = v.toInt() }
+    var playerStateString
+        get() = if (player != null && player!!.state == PlayerState.PLAYING) "Stop" else "Play"
+        set(v) { /* not expected to update player state via this property*/ }
 
     var player: MidiPlayer? = null
 

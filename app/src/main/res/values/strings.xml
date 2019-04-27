@@ -13,4 +13,5 @@
     <string name="simple_chord">Simple Chord:</string>
     <string name="play_midi_file">Play MIDI file:</string>
     <string name="play">Play</string>
+    <string name="stop">Stop</string>
 </resources>
