@@ -154,6 +154,9 @@ workflows:
 
             # write your script here
 
+            ln -s /opt/android-sdk-linux ~/android-sdk-linux
+            ln -s /opt/android-ndk ~/android-sdk-linux/ndk-bundle
+
             git clone https://github.com/Kitware/CMake.git --depth 1 -b v3.14.3 cmake
             cd cmake && mkdir build && cd build && cmake .. && make && cd ../..
 
