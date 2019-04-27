@@ -15,6 +15,7 @@ Building existing linux libraries for Android is in general more painful than bu
 - There is no shared file storage places between multiple programs (/usr/lib etc.) other than system-provided ones (and it is now limited to the public API).
 - Non-standard build ecosystem. No pkg-config, npm, no cocoapod, no nuget, no maven... argurably. It results in that, if there are 10 dependencies on desktop, the corresponding Android build will have to set up 10 dependencies builds and integrate them all.
   - And building everything from sources means that (1) all the build systems have to support Android target, as well as that (2) they have to resolve those dependencies in non-standard way.
+- Toolchains had been changed aggressively e.g. migration from GCC to Clang, moving to "unified headers", and those changes made it almost impossible to catch up to date. And what if any of your dependencies could not be up to date...
 
 A lot of projects for Linux host don't offer dedicated builds for Android. Even if they provide Android build scripts, they are not complete. And even if they are complete, there is mostly "only for itself" and there is no integrated way to combine multiple projects.
 
