@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
                 button_play_smf.text = getString(R.string.play)
             } else {
                 vm.model.playMusic(vm.getSelectedMusic(), midi)
-                vm.model.player!!.playbackCompletedToEnd = Runnable { button_play_smf.text = getString (R.string.play) }
+                vm.model.player!!.playbackCompletedToEnd = Runnable { runOnUiThread { button_play_smf.text = getString (R.string.play) } }
                 button_play_smf.text = getString(R.string.stop)
             }
         }
