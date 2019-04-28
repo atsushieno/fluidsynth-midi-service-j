@@ -68,4 +68,4 @@ The rest of the Java application is written in Kotlin.
 
 ## Scope of the project
 
-This application is built as a proof-of-concept and dogfooding for fluidsynth Android audio drivers.
+This application is built as a proof-of-concept and dogfooding for fluidsynth Android audio drivers. It wouldn't bring best user experiences and features. For example, the MIDI player is based on Java (Kotlin) which is not optimal.
