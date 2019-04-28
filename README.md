@@ -1,6 +1,6 @@
 # What is this?
 
-It is an Android MIDI device service implementation based on [Fluidsynth software synthesizer](https://github.com/Fluidsynth/fluidsynth/).
+It is an Android MIDI device service implementation based on [Fluidsynth software synthesizer](https://github.com/Fluidsynth/fluidsynth/). It comes with some sample dogfooding app UI.
 
 Since Android 6.0 (Marshmallow), it started to provide the standard way to
 receive and send MIDI messages via USB, BLE or any other means through
@@ -14,15 +14,24 @@ MIDI synthesizers that runs on Linux (if its audio dependency is isolated).
 Fluidsynth is one of such a software synthesizer and is (considerably) easy
 to port to Android. It is written in C with a handful of C library dependencies.
 
+Apart from Android MIDI API, it is also possible to use libfluidsynth as a mere library that is used only for an app, without offering MIDI ports as a service.
+
+
+## Compared to other Android ports
+
 There are some people who build Fluidsynth for Android, but what makes
 this port special is that it also provides audible driver sources, not just
 dummy output. It makes use of [OpenSL ES API](https://developer.android.com/ndk/guides/audio/opensl/) as well as [Oboe Audio API](https://github.com/google/Oboe). Both are now based on Fluidsynth master, as my patches are now merged there.
 
 More background can be found at https://dev.to/atsushieno/fluidsynth-20x-for-android-4j6b
 
+(I have no idea whether other Fluidsynth Android ports not supporting has some special contract with Fluidsynth developers and they don't have to provide sources or not.)
+
+
 ## Demo movie
 
 [demo movie](docs/demo.mp4) (How can I embed a video that can be played on github?)
+
 
 ## Prebuilt binaries
 
@@ -37,9 +46,10 @@ This is the basic build steps:
 
 - go to `fluidsynthjna` directory and run `make prepare` and `make`.
   - At `make prepare` step, it may ask you to enter your admin password. It is what `cerbero` build system (explained later) does.
-- then run `./gradlew assembleDebug` (etc.) to build Java (Kotlin) app.
+- then run `./gradlew assembleRelease` (etc.) to build Java (Kotlin) app.
 
 You will need make, wget, and Maven (mvn) installed too.
+
 
 ### Dependencies
 
@@ -54,3 +64,8 @@ It bundles `FluidR3Mono_GM.sf3` which is bundled into apk as Android assets. It 
 For comsumption in Java-based Android application, we use [JNA](https://github.com/java-native-access/jna) and [JNAerator](https://github.com/nativelibs4java/JNAerator) to provide Java binding for libfluidsynth API.
 
 The rest of the Java application is written in Kotlin.
+
+
+## Scope of the project
+
+This application is built as a proof-of-concept and dogfooding for fluidsynth Android audio drivers.
