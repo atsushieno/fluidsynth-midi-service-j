@@ -44,8 +44,8 @@ Building the entire app is complicated because it needs to build fluidsynth for 
 
 This is the basic build steps:
 
-- go to `fluidsynthjna` directory and run `make prepare` and `make`.
-  - At `make prepare` step, it may ask you to enter your admin password. It is what `cerbero` build system (explained later) does.
+- go to `fluidsynthjna` directory and run `make prepare-fluidsynth` and `make`.
+  - At `make prepare-fluidsynth` step, it may ask you to enter your admin password. It is what `cerbero` build system (explained later) does.
 - then run `./gradlew assembleRelease` (etc.) to build Java (Kotlin) app.
 
 You will need make, wget, and Maven (mvn) installed too.
