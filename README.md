@@ -61,7 +61,7 @@ https://github.com/atsushieno/fluidsynth-midi-service-j/issues/12
 
 It bundles `FluidR3Mono_GM.sf3` which is bundled into apk as Android assets. It is released under MIT license (see the source directory).
 
-For comsumption in Java-based Android application, we use [JNA](https://github.com/java-native-access/jna) and [JNAerator](https://github.com/nativelibs4java/JNAerator) to provide Java binding for libfluidsynth API.
+For comsumption in Java-based Android application, we use [JNA](https://github.com/java-native-access/jna) and [JNAerator](https://github.com/nativelibs4java/JNAerator) to provide Java binding for libfluidsynth API. There is a known issue on JNAerator build; it requries Java8 javac (openjdk works). JNAerator has not been maintained upstream to accept newer versions. We'd need Java8 for Android app builds anyways.
 
 The rest of the Java application is written in Kotlin.
 
