@@ -1,5 +1,7 @@
 # What is this?
 
+[![fluidsynth-midi-service-j demo](http://img.youtube.com/vi/ZVyDmaV4Ihw/0.jpg)](http://www.youtube.com/watch?v=ZVyDmaV4Ihw "fluidsynth-midi-service-j demo")
+
 It is an Android MIDI device service implementation based on [Fluidsynth software synthesizer](https://github.com/Fluidsynth/fluidsynth/). It comes with some sample dogfooding app UI.
 
 Since Android 6.0 (Marshmallow), it started to provide the standard way to
