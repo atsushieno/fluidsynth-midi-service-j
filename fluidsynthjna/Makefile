@@ -2,7 +2,7 @@
 
 JNAERATOR_JAR = ../external/JNAerator/jnaerator/target/jnaerator-0.13-SNAPSHOT-shaded.jar
 FL_INC = ../../external/fluidsynth/include/fluidsynth
-ANDROID_NDK = ~/android-sdk-linux/ndk-bundle
+ANDROID_NDK = ~/Android/Sdk/ndk/21.3.6528147
 FL_ANDROID = ../external/fluidsynth/doc/android
 
 SF3 = src/main/assets/FluidR3Mono_GM.sf3
@@ -14,7 +14,7 @@ prepare-fluidsynth:
 	cd $(FL_ANDROID) && make -f Makefile.android prepare
 
 $(JNAERATOR_JAR): jnaerator.stamp
-	cd ../external/JNAerator && mvn clean install && cd ../..
+	cd ../external/JNAerator && mvn clean install  && cd ../..
 
 jnaerator.stamp:
 	touch jnaerator.stamp

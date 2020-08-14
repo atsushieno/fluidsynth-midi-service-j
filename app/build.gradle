@@ -1,15 +1,13 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
     defaultConfig {
         applicationId "name.atsushieno.fluidsynthmidideviceservicej"
         minSdkVersion 23
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -25,16 +23,16 @@ android {
     aaptOptions {
         noCompress 'sf3'
     }
-    // FIXME: make it conditional, strip for release builds
-    packagingOptions {
-        doNotStrip "*/armeabi/libfluidsynth*.so"
-        doNotStrip "*/armeabi-v7a/libfluidsynth*.so"
-        doNotStrip "*/x86/libfluidsynth*.so"
-        doNotStrip "*/x86_64/libfluidsynth*.so"
-    }
     buildTypes {
         debug {
             minifyEnabled false
+
+            packagingOptions {
+                doNotStrip "*/armeabi/libfluidsynth*.so"
+                doNotStrip "*/armeabi-v7a/libfluidsynth*.so"
+                doNotStrip "*/x86/libfluidsynth*.so"
+                doNotStrip "*/x86_64/libfluidsynth*.so"
+            }
         }
         release {
             minifyEnabled false

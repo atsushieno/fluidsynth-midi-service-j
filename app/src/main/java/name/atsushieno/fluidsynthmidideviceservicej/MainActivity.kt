@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
             view = owner
             model = ApplicationModel.getInstance(owner)
             performanceModeAdapter = ArrayAdapter(view, android.R.layout.simple_dropdown_item_1line, arrayOf("None", "LowLatency", "PowerSaving"))
-            midiMusicAdapter = ArrayAdapter (view, android.R.layout.simple_dropdown_item_1line, view.assets.list("").filter { f -> f.endsWith(".mid", true) })
+            midiMusicAdapter = ArrayAdapter (view, android.R.layout.simple_dropdown_item_1line, view.assets.list("")!!.filter { f -> f.endsWith(".mid", true) })
             soundFontAdapter = ArrayAdapter (view, android.R.layout.simple_dropdown_item_1line, model.soundFonts)
         }
 

@@ -3,10 +3,10 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
 
@@ -33,11 +33,10 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation fileTree(include: ['fluidsynth.jar'], dir: '.')
-    implementation fileTree(include: ['fluidsynth-assetloader.jar'], dir: '.')
+    implementation fileTree(include: ['fluidsynth.jar'], dir: 'libs')
+    implementation fileTree(include: ['fluidsynth-assetloader.jar'], dir: 'libs')
     implementation 'net.java.dev.jna:jna:5.2.0@aar'
-    testImplementation 'junit:junit:4.13-beta-2'
+    testImplementation 'junit:junit:4.13'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     //androidTestImplementation 'com.android.support.test:runner:1.0.2'
     //androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'

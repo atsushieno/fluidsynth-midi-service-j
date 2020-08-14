@@ -81,7 +81,7 @@ open class SoundFontLoader : FluidsynthObject {
                 { f -> if (f == null) throw IllegalArgumentException ("null filename"); callbacks.open( f.getString(0)) },
                 { b, l, h -> callbacks.read(b, l.toLong(), h) },
                 { h, p, i -> callbacks.seek(h, p.toInt(), i) },
-                { h -> NativeLong(callbacks.tell(h).toLong()) },
+                { h -> callbacks.tell(h).toLong() },
                 { h -> callbacks.close(h) })
     }
 
