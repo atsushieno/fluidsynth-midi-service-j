@@ -19,14 +19,14 @@ class MidiMachine
     fun processEvent (evt: MidiEvent)
     {
         when (evt.eventType) {
-            MidiEvent.NOTE_ON->
+            MidiEventType.NOTE_ON->
             channels [evt.channel.toUnsigned()].noteVelocity [evt.msb.toUnsigned()] = evt.lsb
 
-            MidiEvent.NOTE_OFF->
+            MidiEventType.NOTE_OFF->
             channels [evt.channel.toUnsigned()].noteVelocity [evt.msb.toUnsigned()] = 0
-            MidiEvent.PAF->
+            MidiEventType.PAF->
             channels [evt.channel.toUnsigned()].pafVelocity [evt.msb.toUnsigned()] = evt.lsb
-            MidiEvent.CC-> {
+            MidiEventType.CC-> {
                 // FIXME: handle RPNs and NRPNs by DTE
                 when (evt.msb) {
                     MidiCC.NRPN_MSB,
@@ -47,11 +47,11 @@ class MidiMachine
                 }
                 channels[evt.channel.toUnsigned()].controls[evt.msb.toUnsigned()] = evt.lsb
             }
-            MidiEvent.PROGRAM->
+            MidiEventType.PROGRAM->
             channels [evt.channel.toUnsigned()].program = evt.msb
-            MidiEvent.CAF->
+            MidiEventType.CAF->
             channels [evt.channel.toUnsigned()].caf = evt.msb
-            MidiEvent.PITCH ->
+            MidiEventType.PITCH ->
             channels [evt.channel.toUnsigned()].pitchbend = ((evt.msb.toUnsigned() shl 7) + evt.lsb).toShort()
         }
         for (receiver in event_received_handlers)

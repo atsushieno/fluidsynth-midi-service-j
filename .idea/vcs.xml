@@ -5,10 +5,19 @@
     <mapping directory="$PROJECT_DIR$/external/JNAerator" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/fluidsynth" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_arm64/flac-1.3.3" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_arm64/glib-2.62.6" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_arm64/libffi-3.2.9999" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_arm64/libogg-1.3.4" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_arm64/libsndfile-1.0.28" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_arm64/libvorbis-1.3.6" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_arm64/proxy-libintl-0.1" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_arm64/zlib-1.2.11" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_armv7/flac-1.3.3" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_armv7/glib-2.62.6" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_armv7/libffi-3.2.9999" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_armv7/libogg-1.3.4" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_armv7/libsndfile-1.0.28" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_armv7/libvorbis-1.3.6" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_armv7/proxy-libintl-0.1" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/fluidsynth/doc/android/external/cerbero/build/sources/android_armv7/zlib-1.2.11" vcs="Git" />

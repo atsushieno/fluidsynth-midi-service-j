@@ -227,13 +227,13 @@ class MidiPlayer : AutoCloseable
         val listener = object : OnMidiEventListener {
             override fun onEvent(m: MidiEvent) {
                 when (m.eventType) {
-                    MidiEvent.NOTE_OFF,
-                    MidiEvent.NOTE_ON -> {
+                    MidiEventType.NOTE_OFF,
+                    MidiEventType.NOTE_ON -> {
                         if (channel_mask != null && channel_mask!![m.channel.toUnsigned()])
                             return // ignore messages for the masked channel.
                     }
-                    MidiEvent.SYSEX,
-                    MidiEvent.SYSEX_2 -> {
+                    MidiEventType.SYSEX,
+                    MidiEventType.SYSEX_END -> {
                         if (buffer.size <= m.extraDataLength)
                             buffer = ByteArray(buffer.size * 2)
                         buffer[0] = m.statusByte
@@ -241,7 +241,7 @@ class MidiPlayer : AutoCloseable
                         output.send(buffer, 0, m.extraDataLength + 1, 0)
                         return
                     }
-                    MidiEvent.META -> {
+                    MidiEventType.META -> {
                         // do nothing.
                         return
                     }
@@ -402,7 +402,7 @@ internal class SimpleSeekProcessor(ticks: Int) : SeekProcessor
         if (current >= seek_to)
             return SeekFilterResult.PASS_AND_TERMINATE
         when (message.event.eventType) {
-            MidiEvent.NOTE_ON, MidiEvent.NOTE_OFF ->  return SeekFilterResult.BLOCK
+            MidiEventType.NOTE_ON, MidiEventType.NOTE_OFF ->  return SeekFilterResult.BLOCK
         }
         return SeekFilterResult.PASS
     }

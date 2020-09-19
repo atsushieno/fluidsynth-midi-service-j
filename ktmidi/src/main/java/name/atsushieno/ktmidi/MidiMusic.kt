@@ -26,7 +26,7 @@ class MidiMusic {
             var v = 0
             for (m in messages) {
                 v += m.deltaTime
-                if (m.event.eventType == MidiEvent.META && m.event.msb == metaType)
+                if (m.event.eventType == MidiEventType.META && m.event.msb == metaType)
                     yield(MidiMessage(v, m.event))
             }
         }
@@ -50,7 +50,7 @@ class MidiMusic {
                     if (deltaTime != m.deltaTime)
                         break
                     t += m.deltaTime
-                    if (m.event.eventType == MidiEvent.META && m.event.msb == MidiMetaType.TEMPO)
+                    if (m.event.eventType == MidiEventType.META && m.event.msb == MidiMetaType.TEMPO)
                         tempo = MidiMetaType.getTempo (m.event.extraData!!, m.event.extraDataOffset)
                 }
                 return v
@@ -208,6 +208,34 @@ class MidiCC
     }
 }
 
+class MidiPerNoteRCC // MIDI 2.0
+{
+    companion object {
+        const val MODULATION = 0x01.toByte()
+        const val BREATH = 0x02.toByte()
+        const val PITCH_7_25 = 0x03.toByte()
+        const val VOLUME = 0x07.toByte()
+        const val BALANCE = 0x08.toByte()
+        const val PAN = 0x0A.toByte()
+        const val EXPRESSION = 0x0B.toByte()
+        const val SOUND_CONTROLLER_1 = 0x46.toByte()
+        const val SOUND_CONTROLLER_2 = 0x47.toByte()
+        const val SOUND_CONTROLLER_3 = 0x48.toByte()
+        const val SOUND_CONTROLLER_4 = 0x49.toByte()
+        const val SOUND_CONTROLLER_5 = 0x4A.toByte()
+        const val SOUND_CONTROLLER_6 = 0x4B.toByte()
+        const val SOUND_CONTROLLER_7 = 0x4C.toByte()
+        const val SOUND_CONTROLLER_8 = 0x4D.toByte()
+        const val SOUND_CONTROLLER_9 = 0x4E.toByte()
+        const val SOUND_CONTROLLER_10 = 0x4F.toByte()
+        const val EFFECT_1_DEPTH = 0x5B.toByte() // Reverb Send Level by default
+        const val EFFECT_2_DEPTH = 0x5C.toByte() // formerly Tremolo Depth
+        const val EFFECT_3_DEPTH = 0x5D.toByte() // Chorus Send Level by default
+        const val EFFECT_4_DEPTH = 0x5E.toByte() // formerly Celeste (Detune) Depth
+        const val EFFECT_5_DEPTH = 0x5F.toByte() // formerly Phaser Depth
+    }
+}
+
 class MidiRpnType
 {
     companion object {
@@ -257,33 +285,96 @@ class MidiMetaType
     }
 }
 
-class MidiEvent
-{
+class MidiMessageType { // MIDI 2.0
+    companion object {
+        const val UTILITY : Byte = 0.toByte()
+        const val SYSTEM : Byte = 1.toByte()
+        const val MIDI1 : Byte = 2.toByte()
+        const val SYSEX7 : Byte = 3.toByte()
+        const val MIDI2 : Byte = 4.toByte()
+        const val SYSEX8_MDS : Byte = 5.toByte()
+    }
+}
+
+class MidiCIProtocolBytes { // MIDI 2.0
+    companion object {
+        const val TYPE: Byte = 0.toByte()
+        const val VERSION: Byte = 1.toByte()
+        const val EXTENSIONS: Byte = 2.toByte()
+    }
+}
+
+class MidiCIProtocolType { // MIDI 2.0
+    companion object {
+        const val MIDI1 : Byte = 1.toByte()
+        const val MIDI2 : Byte = 2.toByte()
+    }
+}
+
+class MidiCIProtocolValue { // MIDI 2.0
+    companion object {
+        const val MIDI1 : Byte = 0.toByte()
+        const val MIDI2_V1 : Byte = 0.toByte()
+    }
+}
+
+class MidiCIProtocolExtensions { // MIDI 2.0
+    companion object {
+        const val JITTER : Byte = 1.toByte()
+        const val LARGER : Byte = 2.toByte()
+    }
+}
+
+class MidiPerNoteManagementFlags { // MIDI 2.0
+    companion object {
+        const val RESET : Byte = 1.toByte()
+        const val DETACH : Byte = 2.toByte()
+    }
+}
+
+class MidiEventType {
     companion object {
 
-        const val NOTE_OFF : Byte = 0x80.toByte()
-        const val NOTE_ON : Byte = 0x90.toByte()
-        const val PAF : Byte = 0xA0.toByte()
-        const val CC : Byte = 0xB0.toByte()
-        const val PROGRAM : Byte = 0xC0.toByte()
-        const val CAF : Byte = 0xD0.toByte()
-        const val PITCH : Byte = 0xE0.toByte()
-        const val SYSEX : Byte = 0xF0.toByte()
-        const val MTC_QUARTER_FRAME : Byte = 0xF1.toByte()
-        const val SONG_POSITION_POINTER : Byte = 0xF2.toByte()
-        const val SONG_SELECT : Byte = 0xF3.toByte()
-        const val TUNE_REQUEST: Byte = 0xF6.toByte()
-        const val SYSEX_2 : Byte = 0xF7.toByte()
-        const val MIDI_CLOCK : Byte = 0xF8.toByte()
-        const val MIDI_TICK : Byte = 0xF9.toByte()
-        const val MIDI_START : Byte = 0xFA.toByte()
-        const val MIDI_CONTINUE : Byte = 0xFB.toByte()
-        const val MIDI_STOP : Byte = 0xFC.toByte()
-        const val ACTIVE_SENSE : Byte = 0xFE.toByte()
-        const val RESET : Byte = 0xFF.toByte()
-        const val META : Byte = 0xFF.toByte()
+        // MIDI 2.0-specific
+        const val PER_NOTE_RCC: Byte = 0x00.toByte()
+        const val PER_NOTE_ACC: Byte = 0x10.toByte()
+        const val RPN: Byte = 0x20.toByte()
+        const val NRPN: Byte = 0x30.toByte()
+        const val RELATIVE_RPN: Byte = 0x40.toByte()
+        const val RELATIVE_NRPN: Byte = 0x50.toByte()
+        const val PER_NOTE_PITCH: Byte = 0x60.toByte()
+        const val PER_NOTE_MANAGEMENT: Byte = 0xF0.toByte()
 
-        const val EndSysEx = 0xF7
+        // MIDI 1.0/2.0 common
+        const val NOTE_OFF: Byte = 0x80.toByte()
+        const val NOTE_ON: Byte = 0x90.toByte()
+        const val PAF: Byte = 0xA0.toByte()
+        const val CC: Byte = 0xB0.toByte()
+        const val PROGRAM: Byte = 0xC0.toByte()
+        const val CAF: Byte = 0xD0.toByte()
+        const val PITCH: Byte = 0xE0.toByte()
+
+        // MIDI 1.0-specific
+        const val SYSEX: Byte = 0xF0.toByte()
+        const val MTC_QUARTER_FRAME: Byte = 0xF1.toByte()
+        const val SONG_POSITION_POINTER: Byte = 0xF2.toByte()
+        const val SONG_SELECT: Byte = 0xF3.toByte()
+        const val TUNE_REQUEST: Byte = 0xF6.toByte()
+        const val SYSEX_END: Byte = 0xF7.toByte()
+        const val MIDI_CLOCK: Byte = 0xF8.toByte()
+        const val MIDI_TICK: Byte = 0xF9.toByte()
+        const val MIDI_START: Byte = 0xFA.toByte()
+        const val MIDI_CONTINUE: Byte = 0xFB.toByte()
+        const val MIDI_STOP: Byte = 0xFC.toByte()
+        const val ACTIVE_SENSE: Byte = 0xFE.toByte()
+        const val RESET: Byte = 0xFF.toByte()
+        const val META: Byte = 0xFF.toByte()
+    }
+}
+
+class MidiEvent // MIDI 1.0 only
+{
+    companion object {
 
         fun convert (bytes : ByteArray, index : Int, size : Int) = sequence {
             var i = index
@@ -345,9 +436,9 @@ class MidiEvent
     val eventType : Byte
         get() =
             when (statusByte) {
-                META,
-                SYSEX,
-                SYSEX_2 -> this.statusByte
+                MidiEventType.META,
+                MidiEventType.SYSEX,
+                MidiEventType.SYSEX_END -> this.statusByte
                 else ->(value and 0xF0).toByte()
             }
 
@@ -370,8 +461,7 @@ class MidiEvent
     }
 }
 
-class SmfWriter// default meta event writer.
-(var stream: OutputStream) {
+class SmfWriter(var stream: OutputStream) {
 
     var disableRunningStatus : Boolean = false
 
@@ -418,8 +508,8 @@ class SmfWriter// default meta event writer.
         for (e in track.messages) {
             write7BitVariableInteger (e.deltaTime)
             when (e.event.eventType) {
-                MidiEvent.META -> metaEventWriter(false, e, stream)
-                MidiEvent.SYSEX, MidiEvent.SYSEX_2 -> {
+                MidiEventType.META -> metaEventWriter(false, e, stream)
+                MidiEventType.SYSEX, MidiEventType.SYSEX_END -> {
                     stream.writeByte(e.event.eventType)
                     if (e.event.extraData != null) {
                         write7BitVariableInteger(e.event.extraDataLength)
@@ -466,8 +556,8 @@ class SmfWriter// default meta event writer.
 
             // arguments
             when (e.event.eventType) {
-                MidiEvent.META -> size += metaEventWriter (true, e, null)
-                MidiEvent.SYSEX, MidiEvent.SYSEX_2 -> {
+                MidiEventType.META -> size += metaEventWriter (true, e, null)
+                MidiEventType.SYSEX, MidiEventType.SYSEX_END -> {
                     size++
                     if (e.event.extraData != null) {
                         size += getVariantLength(e.event.extraDataLength)
@@ -636,8 +726,8 @@ class SmfReader(private var stream: InputStream) {
         running_status = if (b < 0x80) running_status else readByte ().toUnsigned()
         val len: Int
         when (running_status) {
-            MidiEvent.SYSEX.toUnsigned(), MidiEvent.SYSEX_2.toUnsigned(), MidiEvent.META.toUnsigned() -> {
-                val metaType = if (running_status == MidiEvent.META.toUnsigned()) readByte () else 0
+            MidiEventType.SYSEX.toUnsigned(), MidiEventType.SYSEX_END.toUnsigned(), MidiEventType.META.toUnsigned() -> {
+                val metaType = if (running_status == MidiEventType.META.toUnsigned()) readByte () else 0
                 len = readVariableLength()
                 val args = ByteArray(len)
                 if (len > 0)
@@ -886,7 +976,7 @@ class SmfTrackSplitter(var source: MutableList<MidiMessage>, deltaTimeSpec: Byte
     private fun getTrackID (e : MidiMessage) : Int
     {
         return when (e.event.eventType) {
-            MidiEvent.META, MidiEvent.SYSEX, MidiEvent.SYSEX_2 -> -1
+            MidiEventType.META, MidiEventType.SYSEX, MidiEventType.SYSEX_END -> -1
             else -> e.event.channel.toUnsigned()
         }
     }
