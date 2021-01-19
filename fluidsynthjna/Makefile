@@ -14,7 +14,7 @@ prepare-fluidsynth:
 	cd $(FL_ANDROID) && make -f Makefile.android prepare
 
 $(JNAERATOR_JAR): jnaerator.stamp
-	cd ../external/JNAerator && mvn clean install  && cd ../..
+	cd ../external/JNAerator && mvn clean install -Dmaven.test.skip=true  && cd ../..
 
 jnaerator.stamp:
 	touch jnaerator.stamp
