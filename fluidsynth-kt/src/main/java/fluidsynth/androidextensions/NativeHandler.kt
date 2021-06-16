@@ -2,12 +2,10 @@ package fluidsynth.androidextensions
 
 import android.content.res.AssetManager
 import android.media.midi.MidiDevice
+import com.sun.jna.Pointer
 import com.sun.jna.ptr.PointerByReference
-import fluidsynth.FluidsynthAssetLoaderLibrary
-import fluidsynth.FluidsynthInteropException
+import fluidsynth.*
 import fluidsynth.FluidsynthLibrary.fluid_sfloader_t
-import fluidsynth.Settings
-import fluidsynth.Synth
 
 class NativeHandler
 {
@@ -21,16 +19,10 @@ class NativeHandler
             asset_manager_java = assetManager
             setAssetManagerContext(assetManager)
         }
-        val ret = library_assetloader.new_fluid_android_asset_sfloader(FluidsynthAssetLoaderLibrary.fluid_settings_t(settings.native.pointer), null)
-        if (ret == null)
-            throw FluidsynthInteropException("Failed to get native asset soundfont loader")
-        // FIXME: fix memory management
-        return fluid_sfloader_t(ret.pointer)
+        return FluidsynthAndroidAssetLoaderLibrary.INSTANCE.new_fluid_android_asset_sfloader(FluidsynthLibrary.fluid_settings_t(settings.native.pointer), Pointer.NULL)
     }
 
     companion object {
-        val library_assetloader = FluidsynthAssetLoaderLibrary.INSTANCE
-
         val INSTANCE = NativeHandler()
         var asset_manager_java : AssetManager? = null
     }

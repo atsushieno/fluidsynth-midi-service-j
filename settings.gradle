@@ -1,1 +1,1 @@
-include ':app', ':fluidsynth-kt', 'fluidsynth-jna', 'fluidsynth-assetloader-jna'
+include ':app', ':fluidsynth-kt', 'fluidsynth-jna'
