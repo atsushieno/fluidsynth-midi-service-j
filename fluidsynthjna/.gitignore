@@ -5,4 +5,5 @@ jnaerator.stamp
 src/main/jniLibs
 fluid-soundfont_3.1.orig.tar.gz
 src/main/assets/FluidR3_GM.sf2
+.download.stamp
 

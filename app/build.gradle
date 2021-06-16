@@ -1,24 +1,17 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
 
 android {
     compileSdkVersion 30
     defaultConfig {
         applicationId "name.atsushieno.fluidsynthmidideviceservicej"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        externalNativeBuild {
-            cmake {
-                cppFlags ""
-            }
-        }
-    }
-    dataBinding {
-        enabled true
     }
     aaptOptions {
         noCompress 'sf3'
@@ -28,10 +21,7 @@ android {
             minifyEnabled false
 
             packagingOptions {
-                doNotStrip "*/armeabi/libfluidsynth*.so"
-                doNotStrip "*/armeabi-v7a/libfluidsynth*.so"
-                doNotStrip "*/x86/libfluidsynth*.so"
-                doNotStrip "*/x86_64/libfluidsynth*.so"
+                doNotStrip "**/libfluidsynth*.so"
             }
         }
         release {
@@ -39,24 +29,22 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    externalNativeBuild {
-        cmake {
-        }
+    buildFeatures {
+        dataBinding true
     }
-    buildToolsVersion '28.0.3'
 }
 
 dependencies {
-    implementation 'net.java.dev.jna:jna:5.2.0@aar'
+    implementation 'net.java.dev.jna:jna:5.6.0@aar'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation 'androidx.appcompat:appcompat:1.3.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'android.arch.lifecycle:extensions:1.1.1'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation project(path: ':fluidsynthjna')
-    implementation project(path: ':ktmidi')
-    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'dev.atsushieno:ktmidi:0.2.8'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }

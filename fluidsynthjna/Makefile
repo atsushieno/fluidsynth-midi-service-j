@@ -3,15 +3,12 @@
 JNAERATOR_JAR = ../external/JNAerator/jnaerator/target/jnaerator-0.13-SNAPSHOT-shaded.jar
 FL_INC = ../../external/fluidsynth/include/fluidsynth
 ANDROID_NDK = ~/Android/Sdk/ndk/21.3.6528147
-FL_ANDROID = ../external/fluidsynth/doc/android
+FL_DOC_ANDROID = ../external/fluidsynth/test-android/build-scripts
+FL_ANDROID = ../external/fluidsynth/test-android/build-scripts
 
 SF3 = src/main/assets/FluidR3Mono_GM.sf3
 
 all: libs/fluidsynth.jar libs/fluidsynth-assetloader.jar fluidsynth
-
-.PHONY: prepare-fluidsynth
-prepare-fluidsynth:
-	cd $(FL_ANDROID) && make -f Makefile.android prepare
 
 $(JNAERATOR_JAR): jnaerator.stamp
 	cd ../external/JNAerator && mvn clean install -Dmaven.test.skip=true  && cd ../..
@@ -58,21 +55,21 @@ libs/fluidsynth-assetloader.jar: $(JNAERATOR_JAR)
 	-f \
 	-skipDeprecated \
 	-noLibBundle \
-	../$(FL_ANDROID)/fluidsynth-assetloader/fluid_androidasset.h \
+	../$(FL_DOC_ANDROID)/fluidsynth-assetloader/fluid_androidasset.h \
 	&& \
 	cd ..
 
 .PHONY: fluidsynth
 fluidsynth:
-	cd $(FL_ANDROID) && \
-	make -f Makefile.android all || echo "ignore this failure..." && \
-	make -f Makefile.android dist
+	if [ ! -f .download.stamp ] ; then \
+		cd $(FL_ANDROID) && bash ./download.sh ; \
+		touch .download.stamp ; \
+	fi
+	cd $(FL_ANDROID) && bash ./build-all-archs.sh
 	mkdir -p src/main/jniLibs
-	cp -R $(FL_ANDROID)/dist/* src/main/jniLibs
+	cp -R $(FL_ANDROID)/build-artifacts/lib/* src/main/jniLibs
 
 clean:
-	cd $(FL_ANDROID) && make -f Makefile.android clean
+	cd $(FL_ANDROID) && rm -rf build-artifacts android-build-root ../../build_*/
 	rm -rf src/main/jniLibs/*/*.so libs/*.jar libs/_jnaerator.*
 
-wipe-cerbero:
-	cd $(FL_ANDROID) && make -f Makefile.android wipe

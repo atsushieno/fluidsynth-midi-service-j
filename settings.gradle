@@ -1,1 +1,1 @@
-include ':app', ':fluidsynthjna', ':ktmidi'
+include ':app', ':fluidsynthjna'
