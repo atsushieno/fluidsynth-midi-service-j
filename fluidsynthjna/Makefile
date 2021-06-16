@@ -1,6 +1,6 @@
 #!/bin/bash
 
-JNAERATOR_JAR = ../external/JNAerator/jnaerator/target/jnaerator-0.13-SNAPSHOT-shaded.jar
+JNAERATOR_JAR = ../external/JNAerator/jnaerator/target/jnaerator-0.13-shaded.jar
 FL_INC = ../../external/fluidsynth/include/fluidsynth
 ANDROID_NDK = ~/Android/Sdk/ndk/21.3.6528147
 FL_DOC_ANDROID = ../external/fluidsynth/test-android/build-scripts
@@ -18,7 +18,7 @@ jnaerator.stamp:
 
 libs/fluidsynth.jar: $(JNAERATOR_JAR)
 	mkdir -p libs && cd libs && \
-	java -jar ../$(JNAERATOR_JAR) \
+	java -Djdk.net.usePlainSocketImpl -jar ../$(JNAERATOR_JAR) \
 	-I ../../external/fluidsynth/include/ \
 	-I $(ANDROID_NDK)/usr/include/ \
 	-library fluidsynth \
