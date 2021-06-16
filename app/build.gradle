@@ -42,7 +42,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'android.arch.lifecycle:extensions:1.1.1'
-    implementation project(path: ':fluidsynthjna')
+    implementation project(path: ':fluidsynth-kt')
     implementation 'dev.atsushieno:ktmidi:0.2.8'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

@@ -1,0 +1,34 @@
+
+apply plugin: 'org.anarres.jnaerator'
+
+ext.FL_INC = '../external/fluidsynth/include/fluidsynth'
+
+project(':fluidsynth-jna') {
+	dependencies {
+		implementation 'com.nativelibs4java:jnaerator-runtime:0.12'
+		implementation 'net.java.dev.jna:jna:5.6.0'
+		implementation 'com.google.guava:guava:24.1-jre'
+		testImplementation "org.slf4j:slf4j-api:1.7.30"
+	}
+
+	jnaerator {
+		libraryName 'fluidsynth'
+		packageName 'fluidsynth'
+		headerFiles "${FL_INC}/synth.h", \
+			"${FL_INC}/sfont.h", \
+			"${FL_INC}/audio.h", \
+			"${FL_INC}/midi.h", \
+			"${FL_INC}/voice.h", \
+			"${FL_INC}/event.h", \
+			"${FL_INC}/gen.h", \
+			"${FL_INC}/ladspa.h", \
+			"${FL_INC}/log.h", \
+			"${FL_INC}/misc.h", \
+			"${FL_INC}/mod.h", \
+			"${FL_INC}/seqbind.h", \
+			"${FL_INC}/settings.h", \
+			"${FL_INC}/shell.h", \
+			"${FL_INC}/types.h"
+		//extraArgs "-f -skipDeprecated"
+	}
+}

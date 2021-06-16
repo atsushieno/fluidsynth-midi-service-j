@@ -5,10 +5,14 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.anarres.gradle:gradle-jnaerator-plugin:1.0.1"
+        // https://github.com/etiennestuder/gradle-plugindev-plugin/issues/11
+        classpath "com.nativelibs4java:jnaerator:0.11"
     }
 }
 
@@ -16,6 +20,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        jcenter()
     }
 }
 

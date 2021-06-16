@@ -1,1 +1,1 @@
-include ':app', ':fluidsynthjna'
+include ':app', ':fluidsynth-kt', 'fluidsynth-jna'
