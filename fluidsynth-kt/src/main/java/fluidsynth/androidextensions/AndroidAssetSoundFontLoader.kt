@@ -20,7 +20,7 @@ class AndroidAssetSoundFontLoader : SoundFontLoader
     public val callbacks : AssetLoaderCallbacks
 
     constructor(settings : Settings, assetManager : AssetManager)
-    : super (library.new_fluid_defsfloader (settings.getHandle()), true)
+    : super (library.new_fluid_defsfloader (settings.native), true)
     {
         callbacks = AssetLoaderCallbacks(assetManager)
         setCallbacks (callbacks)

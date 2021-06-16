@@ -1,9 +1,6 @@
 package fluidsynth
 
-import fluidsynth.FluidsynthLibrary as library
-import fluidsynth.FluidsynthObject
-import fluidsynth.Settings
-import fluidsynth.Synth
+import fluidsynth.FluidsynthLibrary.fluid_audio_driver_t
 
 class AudioDriver : FluidsynthObject
 {
@@ -14,9 +11,10 @@ class AudioDriver : FluidsynthObject
     }
 
     constructor(settings : Settings, synth : Synth)
-        : super (library.new_fluid_audio_driver (settings.getHandle(), synth.getHandle()), true)
-    {
-    }
+        : super (library.new_fluid_audio_driver (settings.native, synth.native), true)
+
+    val native : fluid_audio_driver_t
+        get() = h as fluid_audio_driver_t
 
     /*
     public constructor (settings : Settings, handler : AudioHandler, dat : ByteArray)
@@ -38,6 +36,6 @@ class AudioDriver : FluidsynthObject
     */
 
     override fun onClose() {
-        library.delete_fluid_audio_driver (getHandle())
+        library.delete_fluid_audio_driver (native)
     }
 }

@@ -1,24 +1,22 @@
 package name.atsushieno.fluidsynthmidideviceservicej
 
-import android.arch.lifecycle.*
+import androidx.lifecycle.*
 import android.content.Context
-import android.databinding.DataBindingUtil
+import androidx.databinding.DataBindingUtil
 import android.media.AudioManager
 import android.media.midi.MidiDeviceInfo
 import android.media.midi.MidiInputPort
 import android.media.midi.MidiManager
 import android.media.midi.MidiReceiver
 import android.os.AsyncTask
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.ArrayAdapter
-import kotlinx.android.synthetic.main.activity_main.*
 import name.atsushieno.fluidsynthmidideviceservicej.databinding.ActivityMainBinding
-import name.atsushieno.ktmidi.MidiMusic
-import name.atsushieno.ktmidi.MidiPlayer
-import name.atsushieno.ktmidi.PlayerState
-import name.atsushieno.ktmidi.SmfReader
+import dev.atsushieno.ktmidi.MidiMusic
+import dev.atsushieno.ktmidi.MidiPlayer
+import dev.atsushieno.ktmidi.PlayerState
 
 class MainActivity : AppCompatActivity(), LifecycleObserver {
 

@@ -2,6 +2,7 @@
 apply plugin: 'org.anarres.jnaerator'
 
 ext.FL_INC = '../external/fluidsynth/include/fluidsynth'
+ext.FL_DOC_ANDROID = '../external/fluidsynth/doc/android'
 
 project(':fluidsynth-jna') {
 	dependencies {

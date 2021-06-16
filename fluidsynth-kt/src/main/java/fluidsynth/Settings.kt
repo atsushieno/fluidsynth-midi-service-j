@@ -1,42 +1,44 @@
 package fluidsynth
 
 import java.nio.IntBuffer
-import com.sun.jna.ptr.PointerByReference
+import fluidsynth.FluidsynthLibrary.fluid_settings_t
 import java.nio.ByteBuffer
 import java.nio.DoubleBuffer
-import fluidsynth.FluidsynthLibrary as library
 
 class Settings : FluidsynthObject
 {
     companion object {
-        var library = fluidsynth.FluidsynthLibrary.INSTANCE
+        var library = FluidsynthLibrary.INSTANCE
     }
 
     constructor()
         : super (library.new_fluid_settings (), true)
 
-    constructor(handle : PointerByReference)
+    constructor(handle : fluid_settings_t)
         : super (handle, false)
+
+    val native : fluid_settings_t
+        get() = h as fluid_settings_t
 
     override fun onClose()
     {
-        library.delete_fluid_settings (getHandle())
+        library.delete_fluid_settings (native)
     }
 
     fun getEntry (name : String) : SettingEntry
     {
-        return Settings.SettingEntry(getHandle(), name)
+        return Settings.SettingEntry(native, name)
     }
 
     class SettingEntry
     {
-        internal constructor(handle : PointerByReference, name : String)
+        internal constructor(handle : fluid_settings_t, name : String)
         {
             this.handle = handle
             this.name_ = name
         }
 
-        private val handle : PointerByReference
+        private val handle : fluid_settings_t
         private val name_ : String
 
         private fun getName () : String {

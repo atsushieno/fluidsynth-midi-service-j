@@ -1,6 +1,6 @@
 package name.atsushieno.fluidsynthmidideviceservicej
 
-import android.arch.lifecycle.*
+import androidx.lifecycle.*
 import android.content.Intent
 import android.media.midi.MidiDeviceService
 import android.media.midi.MidiDeviceStatus

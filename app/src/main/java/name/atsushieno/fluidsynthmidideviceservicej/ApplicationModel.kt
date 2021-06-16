@@ -3,8 +3,7 @@ package name.atsushieno.fluidsynthmidideviceservicej
 import android.content.Context
 import android.media.AudioManager
 import android.media.midi.MidiReceiver
-import name.atsushieno.ktmidi.*
-import kotlin.experimental.and
+import dev.atsushieno.ktmidi.*
 
 class ApplicationModel(context: Context) {
     companion object
@@ -59,26 +58,31 @@ class ApplicationModel(context: Context) {
 
     private var tmp_arr = ByteArray(3)
 
-    fun playMusic(musicAsset: String, m: MidiReceiver)
+    suspend fun playMusic(musicAsset: String, receiver: MidiReceiver)
     {
-        var reader = SmfReader(context.assets.open(musicAsset))
-        reader.read()
-        var p = MidiPlayer(reader.music)
-        p.addOnEventReceivedListener(object: OnMidiEventListener {
-            override fun onEvent(e: MidiEvent) {
+        val music = MidiMusic()
+        val stream = context.assets.open(musicAsset)
+        music.read(stream.readBytes().toList())
+        stream.close()
+
+        val midiOutput = emptyMidiAccess.openOutputAsync(emptyMidiAccess.outputs.first().id)
+        val p = MidiPlayer(music, midiOutput)
+        p.addOnMessageListener(object: OnMidiMessageListener {
+            override fun onMessage(msg: MidiMessage) {
+                val e = msg.event
                 if (e.extraData != null) {
                     // FIXME: ugh, this is ugly. Can we make changes to how we pass data array?
                     if (tmp_arr.size < e.extraDataLength + 1)
                         tmp_arr = ByteArray(e.extraDataLength + 1)
                     tmp_arr[0] = e.statusByte
                     e.extraData!!.copyInto(tmp_arr, 1, e.extraDataOffset, e.extraDataOffset + e.extraDataLength)
-                    m.send(tmp_arr, 0, tmp_arr.size)
+                    receiver.send(tmp_arr, 0, tmp_arr.size)
                 } else {
                     var size = MidiEvent.fixedDataSize(e.statusByte)
                     tmp_arr[0] = e.statusByte
                     tmp_arr[1] = e.msb
                     tmp_arr[2] = e.lsb
-                    m.send(tmp_arr, 0, size.toInt(), 0)
+                    receiver.send(tmp_arr, 0, size.toInt(), 0)
                 }
             }
         })

@@ -30,10 +30,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
     implementation project(':fluidsynth-jna')
+    implementation project(':fluidsynth-assetloader-jna')
     //implementation fileTree(include: ['fluidsynth-assetloader.jar'], dir: 'libs')
     implementation 'net.java.dev.jna:jna:5.6.0@aar'
     testImplementation 'junit:junit:4.13.2'
