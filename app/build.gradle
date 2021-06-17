@@ -31,7 +31,7 @@ android {
         }
     }
     buildFeatures {
-        dataBinding false // It is silly, but AGP fails to process this and resutls in missing fields.
+        dataBinding true // It is silly, but AGP fails to process this and resutls in missing fields.
     }
 }
 
