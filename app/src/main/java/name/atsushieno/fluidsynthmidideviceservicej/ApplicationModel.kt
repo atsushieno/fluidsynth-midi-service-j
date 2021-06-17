@@ -4,6 +4,8 @@ import android.content.Context
 import android.media.AudioManager
 import android.media.midi.MidiReceiver
 import dev.atsushieno.ktmidi.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class ApplicationModel(context: Context) {
     companion object
@@ -58,8 +60,13 @@ class ApplicationModel(context: Context) {
 
     private var tmp_arr = ByteArray(3)
 
-    suspend fun playMusic(musicAsset: String, receiver: MidiReceiver)
-    {
+    fun playMusic(musicAsset: String, receiver: MidiReceiver) {
+        GlobalScope.launch {
+            playMusicSuspend(musicAsset, receiver)
+        }
+    }
+
+    suspend fun playMusicSuspend(musicAsset: String, receiver: MidiReceiver) {
         val music = MidiMusic()
         val stream = context.assets.open(musicAsset)
         music.read(stream.readBytes().toList())

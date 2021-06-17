@@ -3,7 +3,6 @@ package name.atsushieno.fluidsynthmidideviceservicej
 import androidx.lifecycle.*
 import android.content.Context
 import androidx.databinding.DataBindingUtil
-import android.media.AudioManager
 import android.media.midi.MidiDeviceInfo
 import android.media.midi.MidiInputPort
 import android.media.midi.MidiManager
@@ -13,10 +12,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.Spinner
+import androidx.lifecycle.ViewModelProvider
 import name.atsushieno.fluidsynthmidideviceservicej.databinding.ActivityMainBinding
-import dev.atsushieno.ktmidi.MidiMusic
-import dev.atsushieno.ktmidi.MidiPlayer
-import dev.atsushieno.ktmidi.PlayerState
 
 class MainActivity : AppCompatActivity(), LifecycleObserver {
 
@@ -38,8 +37,8 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         lateinit var midiMusicAdapter: ArrayAdapter<String>
         lateinit var soundFontAdapter: ArrayAdapter<String>
 
-        fun getSelectedSoundFont() = view.spinner_soundfont.selectedItem as String
-        fun getSelectedMusic() = view.spinner_songs.selectedItem as String
+        fun getSelectedSoundFont() = view.findViewById<Spinner>(R.id.spinner_soundfont).selectedItem as String
+        fun getSelectedMusic() = view.findViewById<Spinner>(R.id.spinner_songs).selectedItem as String
     }
 
     lateinit var midi : FluidsynthMidiReceiver
@@ -71,31 +70,31 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
 
         lifecycle.addObserver(this)
 
-        vm = ViewModelProviders.of(this).get(MainActivityViewModel::class.java)
+        vm = ViewModelProvider(this).get(MainActivityViewModel::class.java)
         vm.setContext(this)
         val binding : ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.vm = vm
 
-        this.button_direct.setOnClickListener {
-            this.button_direct.isEnabled = false
+        findViewById<Button>(R.id.button_direct).setOnClickListener {
+            findViewById<Button>(R.id.button_direct).isEnabled = false
 
             if (!this::midi.isInitialized)
                 midi = FluidsynthMidiReceiver(this.applicationContext)
             play_client_midi(midi)
 
-            this.button_direct.isEnabled = true
+            findViewById<Button>(R.id.button_direct).isEnabled = true
         }
 
-        this.button_client.setOnClickListener {
+        findViewById<Button>(R.id.button_client).setOnClickListener {
 
             if (!this::midi_manager.isInitialized) {
-                this.button_client.isEnabled = false
+                findViewById<Button>(R.id.button_client).isEnabled = false
 
                 midi_manager = this.applicationContext.getSystemService(Context.MIDI_SERVICE) as MidiManager
                 val device = midi_manager.devices.first { d -> d.properties.getString(MidiDeviceInfo.PROPERTY_PRODUCT).equals("JFluidMidi") }
                 midi_manager.openDevice(device, {
                     midi_input = it.openInputPort(0)
-                    this.runOnUiThread { this.button_client.isEnabled = true }
+                    this.runOnUiThread { findViewById<Button>(R.id.button_client).isEnabled = true }
                     play_client_midi(midi_input!!)
                 }, null)
             }
@@ -103,17 +102,17 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
                 play_client_midi(midi_input!!)
         }
 
-        this.button_play_smf.setOnClickListener {
+        findViewById<Button>(R.id.button_play_smf).setOnClickListener {
 
             if (!this::midi.isInitialized)
                 midi = FluidsynthMidiReceiver(this.applicationContext)
             if (vm.model.isPlayingMusic()) {
                 vm.model.stopMusic()
-                button_play_smf.text = getString(R.string.play)
+                findViewById<Button>(R.id.button_play_smf).text = getString(R.string.play)
             } else {
                 vm.model.playMusic(vm.getSelectedMusic(), midi)
-                vm.model.player!!.playbackCompletedToEnd = Runnable { runOnUiThread { button_play_smf.text = getString (R.string.play) } }
-                button_play_smf.text = getString(R.string.stop)
+                vm.model.player!!.playbackCompletedToEnd = Runnable { runOnUiThread { findViewById<Button>(R.id.button_play_smf).text = getString (R.string.play) } }
+                findViewById<Button>(R.id.button_play_smf).text = getString(R.string.stop)
             }
         }
     }
