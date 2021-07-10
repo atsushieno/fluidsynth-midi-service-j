@@ -23,10 +23,12 @@ jobs:
     - name: apt install
       run: |
         echo y | sudo apt-get install doxygen cmake ninja-build
+    - name: build fluidsynth
+      run: cd fluidsynth-kt && make fluidsynth
+      env:
+        NDK: /usr/local/lib/android/sdk/ndk/21.4.7075529
     - name: build
-      run: |
-        cd fluidsynth-kt && make fluidsynth
-        ./gradlew --warning-mode all build
+      run: ./gradlew --warning-mode all build
     - name: upload artifact
       if: success()
       uses: actions/upload-artifact@v2
