@@ -22,7 +22,7 @@ jobs:
         java-version: 11
     - name: apt install
       run: |
-        echo y | sudo apt-get install doxygen cmake ninja-build
+        echo y | sudo apt-get install doxygen cmake ninja-build gettext
     - name: build fluidsynth
       run: cd fluidsynth-kt && make fluidsynth
       env:
