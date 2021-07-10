@@ -1,14 +1,13 @@
 package fluidsynth
 
-import com.sun.jna.PointerType
 import com.sun.jna.ptr.PointerByReference
 
-abstract class FluidsynthObject : AutoCloseable
+public abstract class FluidsynthObject : AutoCloseable
 {
-    val h : PointerType
+    var h : PointerByReference
     var needs_disposal : Boolean
 
-    constructor(handle : PointerType, needsDisposal : Boolean)
+    constructor(handle : PointerByReference, needsDisposal : Boolean)
     {
         this.h = handle
         this.needs_disposal = needsDisposal
@@ -23,5 +22,5 @@ abstract class FluidsynthObject : AutoCloseable
 
     abstract fun onClose ()
 
-    fun getHandle () : PointerType { return h }
+    fun getHandle () : PointerByReference { return h }
 }
