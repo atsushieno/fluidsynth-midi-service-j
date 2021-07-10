@@ -25,7 +25,7 @@ jobs:
         echo y | sudo apt-get install doxygen cmake ninja-build
     - name: build
       run: |
-        cd fluidsynthjna && make
+        cd fluidsynth-kt && make fluidsynth
         ./gradlew --warning-mode all build
     - name: upload artifact
       if: success()
