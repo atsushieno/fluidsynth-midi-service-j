@@ -6,7 +6,7 @@ ext.FL_DOC_ANDROID = '../external/fluidsynth/doc/android'
 
 project(':fluidsynth-jna') {
 	dependencies {
-		implementation 'com.nativelibs4java:jnaerator-runtime:0.12'
+		compileOnly 'com.nativelibs4java:jnaerator-runtime:0.12'
 		testImplementation "org.slf4j:slf4j-api:1.7.30"
 	}
 
