@@ -33,6 +33,6 @@ jobs:
       with:
         name: the artifacts
         path: |
-          build/libs/*.jar
-          build/outputs/aar/*.aar
+          fluidsynth-jna/build/libs/*.jar
+          fluidsynth-kt/build/outputs/aar/*.aar
 

@@ -12,6 +12,11 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_STL=c++_shared"
+            }
+        }
     }
     // FIXME: make it conditional, strip for release builds
     packagingOptions {
@@ -23,6 +28,9 @@ android {
     buildTypes {
         debug {
             minifyEnabled false
+            packagingOptions {
+                doNotStrip "**/*.so"
+            }
         }
         release {
             minifyEnabled false
@@ -32,6 +40,13 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    externalNativeBuild {
+        cmake {
+            version "3.18.1"
+            path "src/main/cpp/CMakeLists.txt"
+        }
     }
 }
 
