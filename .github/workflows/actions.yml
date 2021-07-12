@@ -52,4 +52,5 @@ jobs:
         path: |
           fluidsynth-jna/build/libs/*.jar
           fluidsynth-kt/build/outputs/aar/*.aar
+          app/build/outputs/apk/*/*.apk
 

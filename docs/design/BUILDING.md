@@ -1,3 +1,7 @@
+# This document is deprecated
+
+This document describes the original build scripts which were now deprecated in the mainline Fluidsynth. It is left almost as is in this repo for historical record. (It was the biggest part of this project.)
+
 # Problem and solution
 
 To build Fluidsynth for Android, we have to come up with dependencies like glib, and optionally libsndfile if you want SoundFont v3 support, which it is not easy because of various subsequent dependencies. And Fluidsynth itself uses CMake to build itself, which means the dependencies must align with it.

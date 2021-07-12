@@ -2,7 +2,7 @@
 
 [![fluidsynth-midi-service-j demo](http://img.youtube.com/vi/ZVyDmaV4Ihw/0.jpg)](http://www.youtube.com/watch?v=ZVyDmaV4Ihw "fluidsynth-midi-service-j demo")
 
-It is an Android MIDI device service implementation based on [Fluidsynth software synthesizer](https://github.com/Fluidsynth/fluidsynth/). It comes with some sample dogfooding app UI.
+It is an Android MIDI device service implementation based on [Fluidsynth software synthesizer](https://github.com/Fluidsynth/fluidsynth/) (@atsushieno is the author of its OpenSLES and Oboe driver). It comes with some sample dogfooding app UI.
 
 Since Android 6.0 (Marshmallow), it started to provide the standard way to
 receive and send MIDI messages via USB, BLE or any other means through
@@ -16,7 +16,7 @@ MIDI synthesizers that runs on Linux (if its audio dependency is isolated).
 Fluidsynth is one of such a software synthesizer and is (considerably) easy
 to port to Android. It is written in C with a handful of C library dependencies.
 
-Apart from Android MIDI API, it is also possible to use libfluidsynth as a mere library that is used only for an app, without offering MIDI ports as a service.
+(Apart from Android MIDI API, it is also possible to use libfluidsynth as a mere library that is used only for an app, without offering MIDI ports as a service. But now that it is part of the official Fluidsynth build, it's not specific to this project anymore.)
 
 
 ## Compared to other Android ports
@@ -39,16 +39,16 @@ More background can be found at https://dev.to/atsushieno/fluidsynth-20x-for-and
 
 Beta packages are available at [DeployGate](https://dply.me/l0etkk).
 
+We have GitHub Actions setup with artifact setup for `fluidsynth-jna.jar` (mere JNA bindings by JNAerator) and `fluidsynth-kt.aar` (Object-oriented bindings in Kotlin).
 
 ## Building
 
 Building the entire app is complicated because it needs to build fluidsynth for Android as well as generating automated Java API binding from libfluidsynth C headers.
 
-This is the basic build steps:
+These are the basic build steps:
 
-- go to `fluidsynthjna` directory and run `make prepare-fluidsynth` and `make`.
-  - At `make prepare-fluidsynth` step, it may ask you to enter your admin password. It is what `cerbero` build system (explained later) does.
-- then run `./gradlew assembleRelease` (etc.) to build Java (Kotlin) app.
+- go to `fluidsynth-kt` directory and run `make fluidsynth`.
+- run `./gradlew assembleRelease` (etc.) to build Kotlin app.
 
 You will need make, wget, and Maven (mvn) installed too.
 
@@ -56,18 +56,17 @@ You will need make, wget, and Maven (mvn) installed too.
 ### Dependencies
 
 It depends on official [fluidsynth github repo](https://github.com/Fluidsynth/fluidsynth) which now contains some
-Android build scripts, which in turn depends on [Cerbero build system](https://cgit.freedesktop.org/gstreamer/cerbero/) to build glib-2.0 and co, one of fluidsynth's dependencies. (See [docs/design/BUILDING.md](docs/design/BUILDING.md) on how so.)
+Android build scripts, which in turn builds glib-2.0 and co, which are fluidsynth's dependencies.
 
-To avoid this most difficult part, building libfluidsynth.so with OpenSLES support, we have a set of prebuilt shared libraries so that anyone who just wants to build own synthesizer apps can reuse it: see
-https://github.com/atsushieno/fluidsynth-midi-service-j/issues/12
+(Historically we used GStreamer/Cerbero build system, but as of 2021 we do not need it anymore.)
 
 It bundles `FluidR3Mono_GM.sf3` which is bundled into apk as Android assets. It is released under MIT license (see the source directory).
 
-For comsumption in Java-based Android application, we use [JNA](https://github.com/java-native-access/jna) and [JNAerator](https://github.com/nativelibs4java/JNAerator) to provide Java binding for libfluidsynth API. There is a known issue on JNAerator build; it requries Java8 javac (openjdk works). JNAerator has not been maintained upstream to accept newer versions. We'd need Java8 for Android app builds anyways.
+For comsumption in Kotlin/JVM-based Android application, we use [JNA](https://github.com/java-native-access/jna) and [JNAerator](https://github.com/nativelibs4java/JNAerator) to provide the Java binding for libfluidsynth API. JNAerator has not been maintained upstream to accept newer versions, but we use some derived works as well as `gradle-jnaerator-plugin` instead of the original Maven pom version.
 
 The rest of the Java application is written in Kotlin.
 
 
 ## Scope of the project
 
-This application is built as a proof-of-concept and dogfooding for fluidsynth Android audio drivers. It wouldn't bring best user experiences and features. For example, the MIDI player is based on Java (Kotlin) which is not optimal.
+This application is built as a proof-of-concept and dogfooding for fluidsynth Android audio drivers. It wouldn't bring best user experiences and features. For example, the MIDI player is based on Kotlin which is not optimal.
