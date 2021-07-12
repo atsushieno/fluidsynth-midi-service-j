@@ -8,6 +8,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class ApplicationModel(context: Context) {
+    /*
     companion object
     {
         lateinit var instance: ApplicationModel
@@ -18,9 +19,8 @@ class ApplicationModel(context: Context) {
                 instance = ApplicationModel(context.applicationContext)
             return instance
         }
-    }
+    }*/
 
-    val context: Context
     var portCount = 1
     val soundFonts : MutableList<String>
 
@@ -31,7 +31,6 @@ class ApplicationModel(context: Context) {
     var audioGainPercentage : Int = 100
 
     init {
-        this.context = context
         val manager = context.getSystemService (Context.AUDIO_SERVICE) as AudioManager
         framesPerBuffer = manager.getProperty (AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER).toInt()
         sampleRate = manager.getProperty (AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE).toInt()
@@ -60,15 +59,11 @@ class ApplicationModel(context: Context) {
 
     private var tmp_arr = ByteArray(3)
 
-    fun playMusic(musicAsset: String, receiver: MidiReceiver) {
-        GlobalScope.launch {
-            playMusicSuspend(musicAsset, receiver)
-        }
-    }
+    private lateinit var midiOutput : MidiOutput
 
-    suspend fun playMusicSuspend(musicAsset: String, receiver: MidiReceiver) {
+    suspend fun playMusic(musicAsset: String, receiver: FluidsynthMidiReceiver) {
         val music = MidiMusic()
-        val stream = context.assets.open(musicAsset)
+        val stream = receiver.service.assets.open(musicAsset)
         music.read(stream.readBytes().toList())
         stream.close()
 
@@ -93,11 +88,7 @@ class ApplicationModel(context: Context) {
                 }
             }
         })
-        p.playbackCompletedToEnd = object: Runnable {
-            override fun run() {
-                player = null
-            }
-        }
+        p.playbackCompletedToEnd = Runnable { player = null }
         p.play()
         this.player = p
     }

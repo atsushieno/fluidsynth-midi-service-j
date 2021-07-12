@@ -12,7 +12,7 @@ import fluidsynth.Synth
 
 internal fun Byte.toUnsigned() = if (this < 0) 256 + this else this.toInt()
 
-class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
+class FluidsynthMidiReceiver (val service: Context) : MidiReceiver()
 {
     private val settings: Settings
     private val syn: Synth
@@ -25,7 +25,7 @@ class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
         System.setProperty ("jna.nosys", "false") // https://github.com/java-native-access/jna/issues/384#issuecomment-441405266
         AndroidLogger.installAndroidLogger()
 
-        var am = ApplicationModel.getInstance(context)
+        val am = ApplicationModel(service)
         settings = Settings ()
         settings.getEntry (ConfigurationKeys.SynthThreadSafeApi).setIntValue (0)
         settings.getEntry (ConfigurationKeys.SynthGain).setDoubleValue (am.audioGainPercentage / 100.0) // See https://github.com/atsushieno/fluidsynth-midi-service-j/issues/7
@@ -38,7 +38,7 @@ class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
 
         // We should be able to use this alternatively, but it still has some issue that callbacks are reset in the middle, more GC pinning is likely required.
         //asset_sfloader = AndroidAssetSoundFontLoader(settings, context.assets)
-        asset_sfloader = AndroidNativeAssetSoundFontLoader(settings, context.assets)
+        asset_sfloader = AndroidNativeAssetSoundFontLoader(settings, service.assets)
         syn = Synth (settings)
         syn.handleError = fun (errorCode: Int, wrapperError: String, nativeError: String) : Boolean {
             Log.d("FluidsynthMidiService", "$wrapperError (error code $errorCode: $nativeError)")
@@ -49,7 +49,7 @@ class FluidsynthMidiReceiver (context: Context) : MidiReceiver()
         }
         syn.addSoundFontLoader (asset_sfloader)
 
-        for (sf in ApplicationModel.getInstance(context).soundFonts)
+        for (sf in am.soundFonts)
             syn.loadSoundFont (sf, false)
 
         adriver = AudioDriver (syn.getSettings(), syn)

@@ -12,7 +12,7 @@ class FluidsynthMidiDeviceService : MidiDeviceService(), LifecycleOwner
 {
     class FluidsynthLifecycleObserver(ownerService : FluidsynthMidiDeviceService) : LifecycleObserver
     {
-        val service = ownerService
+        private val service = ownerService
 
         @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         fun onDestroy ()
@@ -33,36 +33,33 @@ class FluidsynthMidiDeviceService : MidiDeviceService(), LifecycleOwner
         }
     }
 
-    private var port_count = 1
-    private lateinit var fluidsynth_receivers: ArrayList<FluidsynthMidiReceiver>
+    private var fluidsynth_receivers = mutableListOf<FluidsynthMidiReceiver>()
 
     internal fun disposeReceivers()
     {
-        if (this::fluidsynth_receivers.isInitialized)
-            for (r in fluidsynth_receivers)
-                r.dispose()
+        for (r in fluidsynth_receivers)
+            r.dispose()
     }
 
     override fun onGetInputPortReceivers(): Array<MidiReceiver> {
-        if (!this::fluidsynth_receivers.isInitialized) {
-            fluidsynth_receivers = ArrayList<FluidsynthMidiReceiver>()
-            for (i in 0 until port_count)
-                fluidsynth_receivers.add(FluidsynthMidiReceiver(this.applicationContext))
+        if (fluidsynth_receivers.isEmpty()) {
+            fluidsynth_receivers = mutableListOf()
+            for (i in 0 until deviceInfo.ports.size)
+                fluidsynth_receivers.add(FluidsynthMidiReceiver(this))
         }
-        for (i in 0 until port_count) {
+        for (i in 0 until deviceInfo.ports.size) {
             if (fluidsynth_receivers [i].isDisposed())
-                fluidsynth_receivers [i] = FluidsynthMidiReceiver(this.applicationContext)
+                fluidsynth_receivers [i] = FluidsynthMidiReceiver(this)
         }
         return fluidsynth_receivers.toTypedArray()
     }
 
-    val dispatcher = ServiceLifecycleDispatcher(this)
+    private val dispatcher = ServiceLifecycleDispatcher(this)
 
     override fun onCreate() {
         dispatcher.onServicePreSuperOnCreate()
         super.onCreate()
         lifecycle.addObserver(FluidsynthLifecycleObserver(this))
-        port_count = ApplicationModel.getInstance(this).portCount
     }
 
     override fun onBind(intent: Intent?): IBinder? {

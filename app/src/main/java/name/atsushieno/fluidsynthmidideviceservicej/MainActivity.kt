@@ -1,5 +1,6 @@
 package name.atsushieno.fluidsynthmidideviceservicej
 
+import android.app.Application
 import androidx.lifecycle.*
 import android.content.Context
 import androidx.databinding.DataBindingUtil
@@ -15,35 +16,31 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import androidx.lifecycle.ViewModelProvider
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import name.atsushieno.fluidsynthmidideviceservicej.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), LifecycleObserver {
 
-    class MainActivityViewModel : ViewModel()
+    // FIXME: this needs complete rewrite.
+    class MainActivityViewModel(application: Application) : AndroidViewModel(application)
     {
-        lateinit var view: MainActivity
-        lateinit var model: ApplicationModel
+        var model: ApplicationModel = ApplicationModel(application)
 
-        fun setContext(owner: MainActivity)
-        {
-            view = owner
-            model = ApplicationModel.getInstance(owner)
-            performanceModeAdapter = ArrayAdapter(view, android.R.layout.simple_dropdown_item_1line, arrayOf("None", "LowLatency", "PowerSaving"))
-            midiMusicAdapter = ArrayAdapter (view, android.R.layout.simple_dropdown_item_1line, view.assets.list("")!!.filter { f -> f.endsWith(".mid", true) })
-            soundFontAdapter = ArrayAdapter (view, android.R.layout.simple_dropdown_item_1line, model.soundFonts)
-        }
+        var performanceModeAdapter : ArrayAdapter<String> =
+            ArrayAdapter(application, android.R.layout.simple_dropdown_item_1line, arrayOf("None", "LowLatency", "PowerSaving"))
+        var midiMusicAdapter: ArrayAdapter<String> =
+            ArrayAdapter (application, android.R.layout.simple_dropdown_item_1line, application.assets.list("")!!.filter { f -> f.endsWith(".mid", true) })
+        var soundFontAdapter: ArrayAdapter<String> =
+            ArrayAdapter (application, android.R.layout.simple_dropdown_item_1line, model.soundFonts)
 
-        lateinit var performanceModeAdapter : ArrayAdapter<String>
-        lateinit var midiMusicAdapter: ArrayAdapter<String>
-        lateinit var soundFontAdapter: ArrayAdapter<String>
-
-        fun getSelectedSoundFont() = view.findViewById<Spinner>(R.id.spinner_soundfont).selectedItem as String
-        fun getSelectedMusic() = view.findViewById<Spinner>(R.id.spinner_songs).selectedItem as String
     }
 
-    lateinit var midi : FluidsynthMidiReceiver
-    lateinit var midi_manager : MidiManager
-    var midi_input : MidiInputPort? = null
+    private lateinit var midi : FluidsynthMidiReceiver
+    private lateinit var midi_manager : MidiManager
+    private var midi_input : MidiInputPort? = null
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     fun onLifecyclePause () { disposeInput() }
@@ -62,7 +59,7 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         }
     }
 
-    lateinit var vm: MainActivityViewModel
+    private lateinit var vm: MainActivityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,7 +68,6 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         lifecycle.addObserver(this)
 
         vm = ViewModelProvider(this).get(MainActivityViewModel::class.java)
-        vm.setContext(this)
         val binding : ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.vm = vm
 
@@ -79,7 +75,7 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
             findViewById<Button>(R.id.button_direct).isEnabled = false
 
             if (!this::midi.isInitialized)
-                midi = FluidsynthMidiReceiver(this.applicationContext)
+                midi = FluidsynthMidiReceiver(this)
             play_client_midi(midi)
 
             findViewById<Button>(R.id.button_direct).isEnabled = true
@@ -105,17 +101,24 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         findViewById<Button>(R.id.button_play_smf).setOnClickListener {
 
             if (!this::midi.isInitialized)
-                midi = FluidsynthMidiReceiver(this.applicationContext)
+                midi = FluidsynthMidiReceiver(this)
             if (vm.model.isPlayingMusic()) {
                 vm.model.stopMusic()
                 findViewById<Button>(R.id.button_play_smf).text = getString(R.string.play)
             } else {
-                vm.model.playMusic(vm.getSelectedMusic(), midi)
-                vm.model.player!!.playbackCompletedToEnd = Runnable { runOnUiThread { findViewById<Button>(R.id.button_play_smf).text = getString (R.string.play) } }
-                findViewById<Button>(R.id.button_play_smf).text = getString(R.string.stop)
+                GlobalScope.launch {
+                    runBlocking { vm.model.playMusic(getSelectedMusic(), midi) }
+                    vm.model.player!!.playbackCompletedToEnd = Runnable {
+                        runOnUiThread { findViewById<Button>(R.id.button_play_smf).text = getString(R.string.play) }
+                    }
+                    runOnUiThread { findViewById<Button>(R.id.button_play_smf).text = getString(R.string.stop) }
+                }
             }
         }
     }
+
+    fun getSelectedSoundFont() = findViewById<Spinner>(R.id.spinner_soundfont).selectedItem as String
+    fun getSelectedMusic() = findViewById<Spinner>(R.id.spinner_songs).selectedItem as String
 
     fun play_client_midi (midi : MidiReceiver)
     {
@@ -124,11 +127,11 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         midi.send(arrayOf(0x90.toByte(), 0x40, 120).toByteArray(), 0, 3)
         midi.send(arrayOf(0x90.toByte(), 0x44, 120).toByteArray(), 0, 3)
         midi.send(arrayOf(0x90.toByte(), 0x47, 120).toByteArray(), 0, 3)
-        AsyncTask.execute {
-            Thread.sleep(1000)
+        GlobalScope.launch {
+            delay(1000)
             midi.send(arrayOf(0x90.toByte(), 0x49, 120).toByteArray(), 0, 3)
-            AsyncTask.execute {
-                Thread.sleep(1000)
+            GlobalScope.launch {
+                delay(1000)
                 midi.send(arrayOf(0x80.toByte(), 0x40, 0).toByteArray(), 0, 3)
                 midi.send(arrayOf(0x80.toByte(), 0x44, 0).toByteArray(), 0, 3)
                 midi.send(arrayOf(0x80.toByte(), 0x47, 0).toByteArray(), 0, 3)
