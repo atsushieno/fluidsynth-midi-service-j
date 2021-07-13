@@ -8,20 +8,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class ApplicationModel(context: Context) {
-    /*
-    companion object
-    {
-        lateinit var instance: ApplicationModel
-
-        fun getInstance(context: Context) : ApplicationModel
-        {
-            if (!Companion::instance.isInitialized || instance.context != context.applicationContext)
-                instance = ApplicationModel(context.applicationContext)
-            return instance
-        }
-    }*/
-
-    var portCount = 1
     val soundFonts : MutableList<String>
 
     var sampleRate : Int = 44100

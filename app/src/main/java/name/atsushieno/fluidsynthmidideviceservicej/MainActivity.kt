@@ -8,7 +8,6 @@ import android.media.midi.MidiDeviceInfo
 import android.media.midi.MidiInputPort
 import android.media.midi.MidiManager
 import android.media.midi.MidiReceiver
-import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -49,7 +48,7 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onLifecycleDestroy () { disposeInput() }
 
-    fun disposeInput()
+    private fun disposeInput()
     {
         vm.model.stopMusic()
         if (midi_input != null) {

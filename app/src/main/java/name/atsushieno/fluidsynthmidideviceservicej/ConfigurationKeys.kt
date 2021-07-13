@@ -99,5 +99,15 @@ class ConfigurationKeys
         val MidiOssDevice = "midi.oss.device"
         @JvmStatic
         val MidiPortName = "midi.portname"
+        @JvmStatic
+        val AudioOboeId = "audio.oboe.id"
+        @JvmStatic
+        val AudioOboeSharingMode = "audio.oboe.sharing-mode"
+        @JvmStatic
+        val AudioOboePerformanceMode = "audio.oboe.performance-mode"
+        @JvmStatic
+        val AudioOboeSampleRateConversionQuality = "audio.oboe.sample-rate-conversion-quality"
+        @JvmStatic
+        val AudioOboeAudioErrorRecoveryMode = "audio.oboe.audio-error-recovery-mode"
     }
 }

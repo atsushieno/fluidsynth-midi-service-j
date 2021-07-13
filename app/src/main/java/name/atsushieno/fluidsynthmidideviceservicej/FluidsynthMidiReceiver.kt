@@ -35,6 +35,7 @@ class FluidsynthMidiReceiver (val service: Context) : MidiReceiver()
         settings.getEntry ("audio.oboe.performance-mode").setStringValue(am.performanceMode)
         settings.getEntry (ConfigurationKeys.SynthSampleRate).setDoubleValue (am.sampleRate.toDouble())
         settings.getEntry (ConfigurationKeys.AudioPeriodSize).setIntValue (am.framesPerBuffer)
+        //settings.getEntry (ConfigurationKeys.AudioOboeAudioErrorRecoveryMode).setStringValue ("Stop")
 
         // We should be able to use this alternatively, but it still has some issue that callbacks are reset in the middle, more GC pinning is likely required.
         //asset_sfloader = AndroidAssetSoundFontLoader(settings, context.assets)
