@@ -1,6 +1,8 @@
-# This document is deprecated
+# This document is for reference
 
 This document describes the original build scripts which were now deprecated in the mainline Fluidsynth. It is left almost as is in this repo for historical record. (It was the biggest part of this project.)
+
+I still described a bunch of Android native build situation which would be useful for anyone who wandered into this dark side of the world.
 
 # Problem and solution
 
@@ -34,8 +36,9 @@ There were handful of candidates, but none of them were appropriate building flu
 - ndk-build: it is only about build system. It's worse than cmake, simple because no one uses it outside Android ecosystem and you will have to maintain the build scripts *everywhere*.
 - qmake: Qt runs on Android and therefore it must be easier to work on top of whatever premises Android. And it should provide decent ways to resolve dependencies. The problem here is that it is completely different build ecosystem than whatever we need (glib and libsndfile).
 - [CDep](https://github.com/google/cdep/): Google developers attempted to build their own build system for purpose like what I explained here. Its critical defect, other than that it is not maintained anymore, is that it requires build related commits within the source tree, meaning that unless the maintainers support CDep it is always builder's work to manually merge the upstream changes. No one maintained the builds after all.
-- AOSP: it may be possible to add extra libraries, but it takes too much time to build everything. Also, there are things that are not part of official API but are bundled in the AOSP (e.g. libogg) and it is unclear how to deal with them.
-
+- AOSP: it may be possible to add extra libraries, but it takes too much time to build everything. Also, there are things that are not part of official API but are bundled in the AOSP (e.g. libogg) and <del>it is unclear how to deal with them</del> now it is clear that only public API is accessible at run time.
+- [Prefab](https://github.com/google/prefab/): Google's latest attempt to build a usable package system. It introduced a new variant of AAR, officially integrated to Android Gradle Plugin, and Oboe is now also distributed as a Prefab package. Still, it has some major drawbacks e.g. 1) [only one headers directory can be specified in a Prefab package](https://issuetracker.google.com/issues/168777344), 2) [Prefab AARs and non-Prefab AARs that contain native libraries are **Exclusive**](https://issuetracker.google.com/issues/154133927), 3) all native libraries must use uniform libc++_shared.so` (ODR violation otherwise), but there is no support to validate that or adjust things to make them so, 4) [AGP does not resolve Prefabs within the same project](https://issuetracker.google.com/issues/175291074) so you cannot create a dogfooding app within the same project(!), and 5) ndkports, the Prefab builder that Google offers is used by only 3 people in the world (as of writing this, after >1 year since release); one is myself, and another one is the developer.
+- [vcpkg](https://github.com/microsoft/vcpkg): Microsoft tries to embrace C++ packaging ecosystem that tries to be cross-platform and more importantly for them, ensure Windows builds of those libraries. It has a package definition for glib, as well as Android Prefab packaging support, so technically it may be possible to build glib for Android. It used to have critical defect that the packages in Vcpkg repo primarily targets Windows and did not respect the effort that brought the latest versions i.e. only the version that was used by gtk-win32/64 is registered. It is still impossible to use it for this project because [Microsoft still does not respect the way how Android native libraries are built and refuses to merge the essential changes for Android](https://github.com/microsoft/vcpkg/pull/15605#issuecomment-825880898).
 
 # How Cerbero fits there
 
