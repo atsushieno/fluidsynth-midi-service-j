@@ -108,6 +108,6 @@ class ConfigurationKeys
         @JvmStatic
         val AudioOboeSampleRateConversionQuality = "audio.oboe.sample-rate-conversion-quality"
         @JvmStatic
-        val AudioOboeAudioErrorRecoveryMode = "audio.oboe.audio-error-recovery-mode"
+        val AudioOboeErrorRecoveryMode = "audio.oboe.error-recovery-mode"
     }
 }

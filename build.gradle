@@ -1,12 +1,11 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.5.10'
+    ext.kotlin_version = '1.5.20'
 
     repositories {
         google()
         mavenCentral()
-        jcenter()
         maven { url "https://www.opendesignflow.org/maven/repository/snapshots" }
     }
     dependencies {
@@ -23,7 +22,6 @@ allprojects {
         google()
         mavenLocal()
         mavenCentral()
-        jcenter()
     }
 }
 

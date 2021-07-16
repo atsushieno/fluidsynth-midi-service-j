@@ -3,12 +3,18 @@ package name.atsushieno.fluidsynthmidideviceservicej
 import android.content.Context
 import android.media.midi.MidiReceiver
 import android.util.Log
+import dev.atsushieno.ktmidi.*
 import fluidsynth.androidextensions.AndroidLogger
 import fluidsynth.androidextensions.AndroidNativeAssetSoundFontLoader
 import fluidsynth.AudioDriver
 import fluidsynth.Settings
 import fluidsynth.SoundFontLoader
 import fluidsynth.Synth
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlin.experimental.and
+import kotlin.time.ExperimentalTime
+import kotlin.time.TimeSource
 
 internal fun Byte.toUnsigned() = if (this < 0) 256 + this else this.toInt()
 
@@ -19,6 +25,7 @@ class FluidsynthMidiReceiver (val service: Context) : MidiReceiver()
     private val adriver: AudioDriver
     private val asset_sfloader: SoundFontLoader
 
+    private var midiProtocol = 1
     private var is_disposed = false
 
     init {
@@ -35,7 +42,7 @@ class FluidsynthMidiReceiver (val service: Context) : MidiReceiver()
         settings.getEntry ("audio.oboe.performance-mode").setStringValue(am.performanceMode)
         settings.getEntry (ConfigurationKeys.SynthSampleRate).setDoubleValue (am.sampleRate.toDouble())
         settings.getEntry (ConfigurationKeys.AudioPeriodSize).setIntValue (am.framesPerBuffer)
-        //settings.getEntry (ConfigurationKeys.AudioOboeAudioErrorRecoveryMode).setStringValue ("Stop")
+        //settings.getEntry (ConfigurationKeys.AudioOboeErrorRecoveryMode).setStringValue ("Stop")
 
         // We should be able to use this alternatively, but it still has some issue that callbacks are reset in the middle, more GC pinning is likely required.
         //asset_sfloader = AndroidAssetSoundFontLoader(settings, context.assets)
@@ -70,10 +77,29 @@ class FluidsynthMidiReceiver (val service: Context) : MidiReceiver()
         is_disposed = true
     }
 
-    override fun onSend(msg: ByteArray?, offset: Int, count: Int, timestamp: Long) {
-        // FIXME: consider timestamp
+    @OptIn(ExperimentalTime::class)
+    override fun onSend(msg: ByteArray, offset: Int, count: Int, timestamp: Long) {
         if (msg == null)
             throw IllegalArgumentException ("null msg")
+        if (timestamp == 0L)
+            sendImmediate(msg, offset, count)
+        else {
+            val time = TimeSource.Monotonic.markNow()
+            runBlocking {
+                delay(timestamp / 1000 - time.elapsedNow().inWholeMicroseconds)
+                sendImmediate(msg, offset, count)
+            }
+        }
+    }
+
+    private fun sendImmediate(msg: ByteArray, offset: Int, count: Int) {
+        if (midiProtocol == 2)
+            sendMidi2Immediate(msg, offset, count)
+        else
+            sendMidi1Immediate(0, msg, offset, count)
+    }
+
+    private fun sendMidi1Immediate(group: Byte, msg: ByteArray, offset: Int, count: Int) {
         var off = offset
         var c = count
         var runningStatus = 0
@@ -102,7 +128,19 @@ class FluidsynthMidiReceiver (val service: Context) : MidiReceiver()
                 0xC0 -> syn.programChange(ch, msg[off].toUnsigned())
                 0xD0 -> syn.channelPressure(ch, msg[off].toUnsigned())
                 0xE0 -> syn.pitchBend(ch, msg[off].toUnsigned() + msg[off + 1].toUnsigned() * 0x80)
-                0xF0 -> syn.sysex(msg.copyOfRange(off, off + c - 1), null)
+                0xF0 -> {
+                    if (stat == 0xF0) { // sysex
+                        val idx = msg.drop(off).indexOf(0xF7.toByte())
+                        val sysex = msg.copyOfRange(off, off + idx)
+                        syn.sysex(sysex, null)
+                        if (sysex[0] == 0x7E.toByte() && sysex[1] == 0x7F.toByte() && sysex[2] == 0x0D.toByte() &&
+                            sysex[3] == 0x12.toByte() && sysex[4] == 1.toByte()) {
+                            // we don't check the rest (Source MUID / Destination MUID / Authority Level)
+                            // as it is obvious that this MIDI receiver is the ultimate destination.
+                            midiProtocol = (sysex[14] and 3).toUnsigned()
+                        }
+                    }
+                }
             }
             when (stat and 0xF0) {
                 0xC0,0xD0 -> {
@@ -116,6 +154,91 @@ class FluidsynthMidiReceiver (val service: Context) : MidiReceiver()
                 else -> {
                     off += 2
                     c -= 2
+                }
+            }
+        }
+    }
+
+    // FIXME: replace this function with ktmidi iterateAsUmp(msg: ByteArray, offset: Int, count: Int)
+    private fun iterateAsUmp(bytes: ByteArray, offset: Int, count: Int) =
+        sequence {
+            var off = offset
+            val end = offset + count
+            while (off < end) {
+                val typeByte = bytes[off].toUnsigned()
+                val ints = when (typeByte and 0xF0) {
+                    MidiMessageType.SYSEX8_MDS -> 4
+                    MidiMessageType.SYSEX7, MidiMessageType.MIDI2 -> 2
+                    else -> 1
+                }
+                when (ints) {
+                    1 -> yield(Ump(getInt(bytes, off)))
+                    2 -> yield(Ump(getInt(bytes, off), getInt(bytes, off + 4)))
+                    4 -> yield(Ump(getInt(bytes, off), getInt(bytes, off + 4), getInt(bytes, off + 8), getInt(bytes, off + 12)))
+                }
+                off += ints * 4
+            }
+        }
+
+    private fun getInt(bytes: ByteArray, offset: Int) =
+        bytes[offset].toUnsigned() +
+                (bytes[offset + 1].toUnsigned() shl 8) +
+                (bytes[offset + 2].toUnsigned() shl 16) +
+                (bytes[offset + 3].toUnsigned() shl 24)
+
+    private fun sendMidi2Immediate(msg: ByteArray, offset: Int, count: Int) {
+        for (ump in iterateAsUmp(msg, offset, count)) {
+            when (ump.messageType) {
+                MidiMessageType.MIDI1 -> {
+                    val channel = ump.group * 16 + ump.channelInGroup
+                    when (ump.eventType) {
+                        MidiChannelStatus.NOTE_OFF -> syn.noteOff(channel, ump.midi1Note)
+                        MidiChannelStatus.NOTE_ON -> syn.noteOn(channel, ump.midi1Note, ump.midi1Velocity)
+                        MidiChannelStatus.PAF -> {} // no PAf in Fluidsynth?
+                        MidiChannelStatus.CC -> syn.cc(channel, ump.midi1CCIndex, ump.midi1CCData)
+                        MidiChannelStatus.PROGRAM -> syn.programChange(channel, ump.midi1Program)
+                        MidiChannelStatus.CAF -> syn.channelPressure(channel, ump.midi1CAf)
+                        MidiChannelStatus.PITCH_BEND -> syn.pitchBend(channel, ump.midi1PitchBendData)
+                    }
+                }
+                MidiMessageType.SYSEX7 -> {
+                    // FIXME: send sysex7
+                }
+                MidiMessageType.MIDI2 -> {
+                    val channel = ump.group * 16 + ump.channelInGroup
+                    when (ump.eventType) {
+                        MidiChannelStatus.NOTE_OFF -> syn.noteOff(channel, ump.midi2Note)
+                        MidiChannelStatus.NOTE_ON -> syn.noteOn(channel, ump.midi2Note, ump.midi2Velocity16)
+                        MidiChannelStatus.PAF -> {} // no PAf in Fluidsynth?
+                        MidiChannelStatus.CC -> syn.cc(channel, ump.midi2CCIndex, ump.midi2CCData)
+                        MidiChannelStatus.PROGRAM -> {
+                            syn.cc(channel, MidiCC.BANK_SELECT, ump.midi2ProgramBankMsb)
+                            syn.cc(channel, MidiCC.BANK_SELECT_LSB, ump.midi2ProgramBankLsb)
+                            syn.programChange(channel, ump.midi2ProgramProgram)
+                        }
+                        MidiChannelStatus.CAF -> syn.channelPressure(channel, ump.midi2CAf)
+                        MidiChannelStatus.PITCH_BEND -> syn.pitchBend(channel, ump.midi2PitchBendData)
+                        MidiChannelStatus.RPN -> {
+                            syn.cc(channel, MidiCC.RPN_MSB, ump.midi2RpnMsb)
+                            syn.cc(channel, MidiCC.RPN_LSB, ump.midi2RpnLsb)
+                            syn.cc(channel, MidiCC.DTE_MSB, ump.midi2RpnData shr 25)
+                            syn.cc(channel, MidiCC.DTE_LSB, (ump.midi2RpnData shr 18) and 0x7F)
+                        }
+                        MidiChannelStatus.NRPN -> {
+                            syn.cc(channel, MidiCC.NRPN_MSB, ump.midi2RpnMsb)
+                            syn.cc(channel, MidiCC.NRPN_LSB, ump.midi2RpnLsb)
+                            syn.cc(channel, MidiCC.DTE_MSB, ump.midi2RpnData shr 25)
+                            syn.cc(channel, MidiCC.DTE_LSB, (ump.midi2RpnData shr 18) and 0x7F)
+                        }
+                        MidiChannelStatus.RELATIVE_RPN, MidiChannelStatus.RELATIVE_NRPN -> {} // FIXME: implement
+                        MidiChannelStatus.PER_NOTE_ACC,
+                        MidiChannelStatus.PER_NOTE_RCC,
+                        MidiChannelStatus.PER_NOTE_MANAGEMENT,
+                        MidiChannelStatus.PER_NOTE_PITCH_BEND -> {} // not supported
+                    }
+                }
+                MidiMessageType.SYSEX8_MDS -> {
+                    // FIXME: send sysex8/MDS ?
                 }
             }
         }
