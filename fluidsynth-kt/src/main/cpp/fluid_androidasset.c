@@ -57,8 +57,7 @@ fluid_sfloader_t* new_fluid_android_asset_sfloader(fluid_settings_t *settings, v
 	return loader;
 }
 
-/* This is a compromised solution for JNAerator for that 1) it cannot handle jobject with JNIEnv as parameters, and that 2) the returned pointer can be converted in the same manner that JNAerated methods. (Most likely my JNA usage issue but no one has answer for it.) */
-void Java_fluidsynth_androidextensions_NativeHandler_setAssetManagerContext(JNIEnv *env, jobject _this, jobject assetManager)
+void Java_dev_atsushieno_fluidsynth_androidextensions_NativeHandler_setAssetManagerContext(JNIEnv *env, jobject _this, jobject assetManager)
 {
 	if (assetManager == NULL)
 		return;

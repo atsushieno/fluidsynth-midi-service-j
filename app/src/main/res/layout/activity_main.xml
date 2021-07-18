@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <variable name="vm" type="name.atsushieno.fluidsynthmidideviceservicej.MainActivity.MainActivityViewModel" />
+        <variable name="vm" type="dev.atsushieno.fluidsynthmidideviceservicej.MainActivity.MainActivityViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

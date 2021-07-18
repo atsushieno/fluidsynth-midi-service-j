@@ -43,7 +43,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0"
     implementation project(':fluidsynth-kt')
-    implementation 'dev.atsushieno:ktmidi:0.3.5'
+    implementation 'dev.atsushieno:ktmidi:0.3.6'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     testImplementation 'junit:junit:4.13.2'
 }

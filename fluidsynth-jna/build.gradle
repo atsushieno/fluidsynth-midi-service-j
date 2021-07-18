@@ -13,12 +13,11 @@ java {
 project(':fluidsynth-jna') {
 	dependencies {
 		compileOnly 'com.nativelibs4java:jnaerator-runtime:0.12'
-		testImplementation "org.slf4j:slf4j-api:1.7.30"
 	}
 
 	jnaerator {
 		libraryName 'fluidsynth'
-		packageName 'fluidsynth'
+		packageName 'dev.atsushieno.fluidsynth'
 		headerFiles "${FL_INC}/synth.h", \
 			"${FL_INC}/sfont.h", \
 			"${FL_INC}/audio.h", \
