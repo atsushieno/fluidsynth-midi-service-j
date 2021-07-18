@@ -52,7 +52,13 @@ class Synth : FluidsynthObject {
     fun noteOn(channel: Int, key: Int, vel: Int) {
         val ret = library.fluid_synth_noteon(getHandle(), channel, key, vel)
         if (ret != 0)
-            onError(ret, "noteon operation failed (error code " + ret+ ")")
+            onError(ret, "noteon operation failed (error code $ret)")
+    }
+
+    fun noteOn2(channel: Int, key: Int, vel: Int) {
+        val ret = library.fluid_synth_noteon2(getHandle(), channel, key, vel)
+        if (ret != 0)
+            onError(ret, "noteon2 operation failed (error code $ret)")
     }
 
     fun noteOff(channel: Int, key: Int) {

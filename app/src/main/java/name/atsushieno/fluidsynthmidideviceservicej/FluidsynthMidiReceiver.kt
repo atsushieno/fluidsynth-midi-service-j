@@ -208,27 +208,27 @@ class FluidsynthMidiReceiver (val service: Context) : MidiReceiver()
                     val channel = ump.group * 16 + ump.channelInGroup
                     when (ump.eventType) {
                         MidiChannelStatus.NOTE_OFF -> syn.noteOff(channel, ump.midi2Note)
-                        MidiChannelStatus.NOTE_ON -> syn.noteOn(channel, ump.midi2Note, ump.midi2Velocity16)
+                        MidiChannelStatus.NOTE_ON -> syn.noteOn2(channel, ump.midi2Note, ump.midi2Velocity16)
                         MidiChannelStatus.PAF -> {} // no PAf in Fluidsynth?
-                        MidiChannelStatus.CC -> syn.cc(channel, ump.midi2CCIndex, ump.midi2CCData)
+                        MidiChannelStatus.CC -> syn.cc(channel, ump.midi2CCIndex, ump.midi2CCData.toInt())
                         MidiChannelStatus.PROGRAM -> {
                             syn.cc(channel, MidiCC.BANK_SELECT, ump.midi2ProgramBankMsb)
                             syn.cc(channel, MidiCC.BANK_SELECT_LSB, ump.midi2ProgramBankLsb)
                             syn.programChange(channel, ump.midi2ProgramProgram)
                         }
-                        MidiChannelStatus.CAF -> syn.channelPressure(channel, ump.midi2CAf)
-                        MidiChannelStatus.PITCH_BEND -> syn.pitchBend(channel, ump.midi2PitchBendData)
+                        MidiChannelStatus.CAF -> syn.channelPressure(channel, ump.midi2CAf.toInt())
+                        MidiChannelStatus.PITCH_BEND -> syn.pitchBend(channel, ump.midi2PitchBendData.toInt())
                         MidiChannelStatus.RPN -> {
                             syn.cc(channel, MidiCC.RPN_MSB, ump.midi2RpnMsb)
                             syn.cc(channel, MidiCC.RPN_LSB, ump.midi2RpnLsb)
-                            syn.cc(channel, MidiCC.DTE_MSB, ump.midi2RpnData shr 25)
-                            syn.cc(channel, MidiCC.DTE_LSB, (ump.midi2RpnData shr 18) and 0x7F)
+                            syn.cc(channel, MidiCC.DTE_MSB, (ump.midi2RpnData shr 25).toInt())
+                            syn.cc(channel, MidiCC.DTE_LSB, (ump.midi2RpnData shr 18).toInt() and 0x7F)
                         }
                         MidiChannelStatus.NRPN -> {
                             syn.cc(channel, MidiCC.NRPN_MSB, ump.midi2RpnMsb)
                             syn.cc(channel, MidiCC.NRPN_LSB, ump.midi2RpnLsb)
-                            syn.cc(channel, MidiCC.DTE_MSB, ump.midi2RpnData shr 25)
-                            syn.cc(channel, MidiCC.DTE_LSB, (ump.midi2RpnData shr 18) and 0x7F)
+                            syn.cc(channel, MidiCC.DTE_MSB, (ump.midi2RpnData shr 25).toInt())
+                            syn.cc(channel, MidiCC.DTE_LSB, (ump.midi2RpnData shr 18).toInt() and 0x7F)
                         }
                         MidiChannelStatus.RELATIVE_RPN, MidiChannelStatus.RELATIVE_NRPN -> {} // FIXME: implement
                         MidiChannelStatus.PER_NOTE_ACC,
