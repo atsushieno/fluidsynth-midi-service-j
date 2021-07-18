@@ -49,14 +49,14 @@ class Synth : FluidsynthObject {
             throw FluidsynthInteropException("$message (native error: $err)")
     }
 
-    fun noteOn(channel: Int, key: Int, vel: Int) {
-        val ret = library.fluid_synth_noteon(getHandle(), channel, key, vel)
+    fun noteOn(channel: Int, key: Int, vel7: Int) {
+        val ret = library.fluid_synth_noteon(getHandle(), channel, key, vel7)
         if (ret != 0)
             onError(ret, "noteon operation failed (error code $ret)")
     }
 
-    fun noteOn2(channel: Int, key: Int, vel: Int) {
-        val ret = library.fluid_synth_noteon2(getHandle(), channel, key, vel)
+    fun noteOn2(channel: Int, key: Int, vel16: Int) {
+        val ret = library.fluid_synth_noteon2(getHandle(), channel, key, vel16)
         if (ret != 0)
             onError(ret, "noteon2 operation failed (error code $ret)")
     }

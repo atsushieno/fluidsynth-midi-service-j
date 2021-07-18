@@ -159,35 +159,8 @@ class FluidsynthMidiReceiver (val service: Context) : MidiReceiver()
         }
     }
 
-    // FIXME: replace this function with ktmidi iterateAsUmp(msg: ByteArray, offset: Int, count: Int)
-    private fun iterateAsUmp(bytes: ByteArray, offset: Int, count: Int) =
-        sequence {
-            var off = offset
-            val end = offset + count
-            while (off < end) {
-                val typeByte = bytes[off].toUnsigned()
-                val ints = when (typeByte and 0xF0) {
-                    MidiMessageType.SYSEX8_MDS -> 4
-                    MidiMessageType.SYSEX7, MidiMessageType.MIDI2 -> 2
-                    else -> 1
-                }
-                when (ints) {
-                    1 -> yield(Ump(getInt(bytes, off)))
-                    2 -> yield(Ump(getInt(bytes, off), getInt(bytes, off + 4)))
-                    4 -> yield(Ump(getInt(bytes, off), getInt(bytes, off + 4), getInt(bytes, off + 8), getInt(bytes, off + 12)))
-                }
-                off += ints * 4
-            }
-        }
-
-    private fun getInt(bytes: ByteArray, offset: Int) =
-        bytes[offset].toUnsigned() +
-                (bytes[offset + 1].toUnsigned() shl 8) +
-                (bytes[offset + 2].toUnsigned() shl 16) +
-                (bytes[offset + 3].toUnsigned() shl 24)
-
     private fun sendMidi2Immediate(msg: ByteArray, offset: Int, count: Int) {
-        for (ump in iterateAsUmp(msg, offset, count)) {
+        for (ump in Ump.fromBytes(msg, offset, count)) {
             when (ump.messageType) {
                 MidiMessageType.MIDI1 -> {
                     val channel = ump.group * 16 + ump.channelInGroup
