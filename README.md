@@ -23,7 +23,7 @@ to port to Android. It is written in C with a handful of C library dependencies.
 
 There are some people who build Fluidsynth for Android, but what makes
 this port special is that it also provides audible driver sources, not just
-dummy output. It makes use of [OpenSL ES API](https://developer.android.com/ndk/guides/audio/opensl/) as well as [Oboe Audio API](https://github.com/google/Oboe). Both are now based on Fluidsynth master, as my patches are now merged there.
+dummy output. It makes use of [OpenSL ES API](https://developer.android.com/ndk/guides/audio/opensl/) as well as [Oboe Audio API](https://github.com/google/Oboe). Both are now based on Fluidsynth master, as our patches are now merged there.
 
 More background can be found at https://dev.to/atsushieno/fluidsynth-20x-for-android-4j6b
 
@@ -55,8 +55,10 @@ You will need make, wget, and Maven (mvn) installed too.
 
 ### Dependencies
 
-It depends on official [fluidsynth github repo](https://github.com/Fluidsynth/fluidsynth) which now contains some
+It depends on our private fork of Fluidsynth which is slightly modified version of the official [fluidsynth github repo](https://github.com/Fluidsynth/fluidsynth). The official sources contain some
 Android build scripts, which in turn builds glib-2.0 and co, which are fluidsynth's dependencies.
+
+Our fork enhances MIDI 2.0 support, yet it is not very different from the original so far.
 
 (Historically we used GStreamer/Cerbero build system, but as of 2021 we do not need it anymore.)
 
