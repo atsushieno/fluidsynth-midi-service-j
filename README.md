@@ -72,3 +72,16 @@ The rest of the Java application is written in Kotlin.
 ## Scope of the project
 
 This application is built as a proof-of-concept and dogfooding for fluidsynth Android audio drivers. It wouldn't bring best user experiences and features. For example, the MIDI player is based on Kotlin which is not optimal.
+
+
+## Licenses
+
+fluidsynth-midi-service-j sources themselves are distributed under the MIT license.
+
+Fluidsynth binaries are bundled within the package builds, and it is released under the LGPL v2.1 license.
+
+fluidsynth-jna depends on JNA and is bundled within the package builds, and it is distributed under either LGPL v2.1 license or Apache v2.0 license.
+
+fluidsynth-jna depends on JNAerator at build time. No runtime dependency. And it is distributed under LGPL v3.0 license.
+
+
