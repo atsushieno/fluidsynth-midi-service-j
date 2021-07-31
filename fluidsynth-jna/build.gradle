@@ -1,5 +1,5 @@
 
-apply plugin: 'org.odfi.anarres.jnaerator'
+apply plugin: 'dev.atsushieno.jnaerator'
 
 ext.FL_INC = '../external/fluidsynth/include/fluidsynth'
 ext.FL_DOC_ANDROID = '../external/fluidsynth/doc/android'

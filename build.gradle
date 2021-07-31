@@ -6,12 +6,12 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        maven { url "https://www.opendesignflow.org/maven/repository/snapshots" }
+        maven { url "https://jitpack.io" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.1.0-alpha03'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.odfi.anarres:gradle-jnaerator-plugin:1.0.0-SNAPSHOT"
+        classpath "dev.atsushieno:gradle-jnaerator-plugin:1.0.100.11"
         // https://github.com/etiennestuder/gradle-plugindev-plugin/issues/11
         classpath "com.nativelibs4java:jnaerator:0.12"
     }
